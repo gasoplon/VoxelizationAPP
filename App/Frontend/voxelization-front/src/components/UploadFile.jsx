@@ -4,6 +4,7 @@ import axios from "axios";
 export function UploadFile() {
   //Estado que guarda el archivo seleccionado
   const [selectedFile, setSelectedFile] = useState(null);
+  const [errores, setErrors] = useState("");
 
   //MANEJADORES
   const onFileChange = (event) => {
@@ -11,6 +12,7 @@ export function UploadFile() {
   };
   // On file upload (click the upload button)
   const onFileUpload = () => {
+    if (selectedFile === null) return;
     // Create an object of formData
     const formData = new FormData();
 
@@ -22,7 +24,19 @@ export function UploadFile() {
 
     // Request made to the backend api
     // Send formData object
-    axios.post("http://localhost:5000/api/uploadFile", formData);
+    axios
+      .post("http://localhost:5000/api/uploadFile", formData)
+      .then((resp) => {
+        console.log(resp.data);
+      })
+      .catch((err) => {
+        const error = {
+          status: err.response["status"],
+          message: err.response["data"]["message"],
+        };
+        console.error(error);
+        setErrors(error["message"]);
+      });
   };
 
   // File content to be displayed after
@@ -55,6 +69,11 @@ export function UploadFile() {
         <input type="file" onChange={onFileChange} />
         <button onClick={onFileUpload}>Upload!</button>
       </div>
+      {errores && (
+        <h5 className="error" style={{ color: "red" }}>
+          {errores}
+        </h5>
+      )}
       {fileData()}
     </div>
   );

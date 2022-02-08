@@ -29,8 +29,9 @@ def receive_file():
         checkFileUploaded(request.files)
     except Exception as exc:
         response = jsonify({'message': exc.message})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, exc.code
 
-    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 

@@ -32,3 +32,10 @@ def checkFileUploaded(files):
     # file[FILE_NAME].save(os.path.join('./', 'prueba.txt'))
 
     return None
+
+# METODOS DE VOXELIZACION
+
+
+def voxelizationOne():
+
+    return None
