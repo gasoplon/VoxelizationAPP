@@ -1,11 +1,12 @@
 import logging
 import os
 from Exceptions import *
+from config import config
 
 # Constantes
 FILE_NAME = 'fileUploaded'
 ALLOWED_EXTENSIONS = {'obj'}
-
+BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/blender_script.py -- {} {}'
 
 def allowed_file_extension(filename):
     return '.' in filename and \
@@ -28,14 +29,11 @@ def checkFileUploaded(files):
     if not file or not allowed_file_extension(file.filename):
         raise NotAllowedExtension
 
-    # Save file
-    # file[FILE_NAME].save(os.path.join('./', 'prueba.txt'))
-
-    return None
+    return file
 
 # METODOS DE VOXELIZACION
 
 
-def voxelizationOne():
-
+def voxelization(file_name):
+    os.system(BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name))
     return None

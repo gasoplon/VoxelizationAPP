@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
-from App.Backend.src.utils import voxelizationOne
 from config import config
-from utils import checkFileUploaded
+from utils import *
 from Exceptions import *
 
+import uuid
 import coloredlogs
 import logging
 
@@ -22,19 +22,34 @@ coloredlogs.install(level='DEBUG')
 enviroment = config['development']
 app = create_app(enviroment)
 
+# Directorio de subida de archivos
+uploads_dir = os.path.join(config['DIRECTORY_UPLOADED_FILE'])
+os.makedirs(uploads_dir, exist_ok=True)
+
+
 
 @app.route('/api/uploadFile', methods=['POST'])
 def receive_file():
+    file = None
     # Analizar el fichero de entrada
     try:
-        checkFileUploaded(request.files)
+       file = checkFileUploaded(request.files)
     except Exception as exc:
         response = jsonify({'message': exc.message})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, exc.code
+    
+    # Save file and voxelization
+    if file:
+        #TODO: filename = secure_filename(file.filename)
+        new_UUID = uuid.uuid1()
+        file_name = str(new_UUID) + '.obj'
+        file.save(os.path.join(uploads_dir, file_name))
 
-    voxelizationOne();
+        # Voxelization Algorithm
+        voxelization(file_name);
 
+    response = jsonify({'message': 'Ok'})
     return response
 
 

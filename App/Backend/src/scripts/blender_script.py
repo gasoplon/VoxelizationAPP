@@ -54,8 +54,6 @@ obj_selected = None;
 for o in obj_name:
     if(o not in useless_objects):
         obj_selected = bpy.data.objects[o]
-        print(o)
-        print(obj_selected)
 
 # Apply modifier
 modifier = obj_selected.modifiers.new(name="Remesh", type='REMESH')
@@ -65,29 +63,5 @@ modifier.mode = "BLOCKS"
 
 # Save
 bpy.ops.export_scene.obj(filepath=obj_out, use_mesh_modifiers=True, axis_forward='-Z', axis_up='Y')
-# bpy.ops.export_mesh.ply(filepath=obj_out, check_existing=False, use_mesh_modifiers=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ##################################################################################################################
