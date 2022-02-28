@@ -1,2 +1,4 @@
 
 C:\Users\david\Documents\Git Repositories\VoxelizationAPP\App\Backend\src>python -m flask run
+
+ blender --background --factory-startup --python blender_script.py -- ../../../../Examples/Cuerpo.obj output.obj

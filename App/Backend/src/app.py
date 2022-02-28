@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from App.Backend.src.utils import voxelizationOne
 from config import config
 from utils import checkFileUploaded
 from Exceptions import *
@@ -31,6 +32,8 @@ def receive_file():
         response = jsonify({'message': exc.message})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, exc.code
+
+    voxelizationOne();
 
     return response
 
