@@ -31,14 +31,26 @@ os.makedirs(uploads_dir, exist_ok=True)
 @app.route('/api/uploadFile', methods=['POST'])
 def receive_file():
     file = None
+    resolution = None
     # Analizar el fichero de entrada
     try:
-       file = checkFileUploaded(request.files)
+        file = checkFileUploaded(request.files)
+        # Resolucion para la voxelización
+        resolution = int(request.form['resolutionVoxel'])
+        # Usar eliminar elementos inconexos
+        removeDisconnectedElements = bool(request.form['useRemoveDisconnected'])
     except Exception as exc:
         response = jsonify({'message': exc.message})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, exc.code
     
+    if(not resolution):
+        # TODO: Lanzar excepion
+        pass
+    if(1 < resolution or resolution > 24):
+        # TODO: Lanzar excepcion
+        pass
+
     # Save file and voxelization
     if file:
         #TODO: filename = secure_filename(file.filename)
@@ -47,7 +59,7 @@ def receive_file():
         file.save(os.path.join(uploads_dir, file_name))
 
         # Voxelization Algorithm
-        voxelization(file_name);
+        voxelization(file_name, resolution, removeDisconnectedElements);
 
     response = jsonify({'message': 'Ok'})
     return response

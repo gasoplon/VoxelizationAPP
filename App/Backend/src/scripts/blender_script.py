@@ -43,10 +43,11 @@ argv = argv[argv.index("--") + 1:] # get all args after "--"
 
 obj_in = argv[0]
 obj_out = argv[1]
+resolution = argv[2]
+removeDisconnectedElements = argv[3]
 
 bpy.ops.import_scene.obj(filepath=obj_in, axis_forward='-Z', axis_up='Y')
 
-# Remesh(Voxelization)
 # Objects
 # TODO: Comprobar que en la escena solo deba existir un elemento(o 4 que no sean Camera, Light o Cube)
 obj_name = bpy.data.objects.keys()
@@ -55,10 +56,11 @@ for o in obj_name:
     if(o not in useless_objects):
         obj_selected = bpy.data.objects[o]
 
-# Apply modifier
+# Remesh(Voxelization).Apply modifier
 modifier = obj_selected.modifiers.new(name="Remesh", type='REMESH')
-modifier.octree_depth = 8
 modifier.mode = "BLOCKS"
+modifier.octree_depth = int(resolution)
+modifier.use_remove_disconnected = bool(removeDisconnectedElements)
 
 
 # Save

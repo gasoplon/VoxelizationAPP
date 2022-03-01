@@ -1,12 +1,25 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Slider, Checkbox, FormControlLabel } from "@mui/material";
+import Box from "@mui/material/Box";
 
 export function UploadFile() {
-  //Estado que guarda el archivo seleccionado
+  // CTES
+  const DEFAULT_RESOLUTION = 4;
+
+  //Estados del componente
   const [selectedFile, setSelectedFile] = useState(null);
   const [errores, setErrors] = useState("");
+  const [resolutionVoxel, setResolutionVoxel] = useState(DEFAULT_RESOLUTION);
+  const [useRemoveDisconnected, setUseRemoveDisconnected] = useState(true);
 
   //MANEJADORES
+  const handleResolutionChange = (event, newValue) => {
+    setResolutionVoxel(newValue);
+  };
+  const handleUseRemoveDisconnected = (event, newValue) => {
+    setUseRemoveDisconnected(newValue);
+  };
   const onFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -16,8 +29,14 @@ export function UploadFile() {
     // Create an object of formData
     const formData = new FormData();
 
-    // Update the formData object
+    // Update the formData object with file
     formData.append("fileUploaded", selectedFile, selectedFile.name);
+
+    // Update the formData object with resolution
+    formData.append("resolutionVoxel", resolutionVoxel);
+
+    // Update the formData object with resolution
+    formData.append("useRemoveDisconnected", useRemoveDisconnected);
 
     // Details of the uploaded file
     console.log(selectedFile);
@@ -45,26 +64,56 @@ export function UploadFile() {
     if (selectedFile) {
       return (
         <div>
-          <h2>File Details:</h2>
-          <p>File Name: {selectedFile.name}</p>
-          <p>File Type: {selectedFile.type}</p>
-          <p>Last Modified: {selectedFile.lastModifiedDate.toDateString()}</p>
+          <h2>Detalles de archivo:</h2>
+          <p>Nombre del archivo: {selectedFile.name}</p>
+          <p>Tipo de archivo: {selectedFile.type}</p>
+          <p>
+            Última modificación: {selectedFile.lastModifiedDate.toDateString()}
+          </p>
         </div>
       );
     } else {
       return (
         <div>
           <br />
-          <h4>Choose before Pressing the Upload button</h4>
+          <h4>¡No ha seleccionado un archivo aún!</h4>
         </div>
       );
     }
   };
 
   return (
-    <div>
+    <div
+      style={{ border: "1px solid black", margin: "5px", textAlign: "center" }}
+    >
       <h1>Componente de carga(Pruebas de Algoritmo)</h1>
-      <h3>File Upload using React!</h3>
+      <br />
+      <h3>Resolución:</h3>
+      <Box sx={{ width: "40%", margin: "auto" }}>
+        <Slider
+          defaultValue={DEFAULT_RESOLUTION}
+          aria-label="Default"
+          valueLabelDisplay="auto"
+          step={1}
+          onChange={handleResolutionChange}
+          marks
+          min={1}
+          max={20}
+        />
+        <FormControlLabel
+          control={<Checkbox defaultChecked />}
+          label="Eliminar elementos inconexos."
+        />
+        {/* <Slider
+          defaultValue={50}
+          aria-label="Default"
+          valueLabelDisplay="auto"
+          step={1}
+          marks
+          min={0}
+          max={20}
+        /> */}
+      </Box>
       <div>
         <input type="file" onChange={onFileChange} />
         <button onClick={onFileUpload}>Upload!</button>
