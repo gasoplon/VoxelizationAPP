@@ -17,25 +17,28 @@ def allowed_file_extension(filename):
 
 
 def checkFileUploaded(files):
-    # Check file sended
-    if files is None:
-        raise NoFileSendedError
+    # # Check file sended
+    # if files is None:
+    #     raise NoFileSendedException
 
     # Get file
     file = files[FILE_NAME]
     logger.debug(file)
 
-    # Check file type
-    if not file or not allowed_file_extension(file.filename):
-        raise NotAllowedExtension
-
+    # # Check file type
+    # if not file:
+    #     raise NoFileSendedException
+        
+    if not allowed_file_extension(file.filename):
+        raise NotAllowedFileExtensionException
+    
     return file
 
 # METODOS DE VOXELIZACION
 def voxelization(file_name, resolution = 4, removeDisconnectedElements = False):
-    # TODO: Comprobar errores
     # os.system(BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name))
     formatted_command = BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements)
     output = os.popen(formatted_command)
     logger.debug(output.read())
+    # logger.debug(output.returncode)
     return None

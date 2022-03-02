@@ -49,12 +49,15 @@ export function UploadFile() {
         console.log(resp.data);
       })
       .catch((err) => {
-        const error = {
-          status: err.response["status"],
-          message: err.response["data"]["message"],
-        };
-        console.error(error);
-        setErrors(error["message"]);
+        // const error = {
+        //   status: err.response["status"],
+        //   message: err.response["data"]["message"],
+        // };
+        // console.error(error);
+        console.error(err);
+        // console.error(err.message);
+        // console.error(err.request);
+        // setErrors(error["message"]);
       });
   };
 
@@ -101,7 +104,9 @@ export function UploadFile() {
           max={20}
         />
         <FormControlLabel
-          control={<Checkbox defaultChecked />}
+          control={
+            <Checkbox defaultChecked onChange={handleUseRemoveDisconnected} />
+          }
           label="Eliminar elementos inconexos."
         />
         {/* <Slider
