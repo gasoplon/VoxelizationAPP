@@ -17,17 +17,9 @@ def allowed_file_extension(filename):
 
 
 def checkFileUploaded(files):
-    # # Check file sended
-    # if files is None:
-    #     raise NoFileSendedException
-
     # Get file
     file = files[FILE_NAME]
     logger.debug(file)
-
-    # # Check file type
-    # if not file:
-    #     raise NoFileSendedException
         
     if not allowed_file_extension(file.filename):
         raise NotAllowedFileExtensionException

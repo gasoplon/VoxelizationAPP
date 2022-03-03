@@ -30,3 +30,7 @@ class NotAllowedFileExtensionException(InvalidAPIParameterException):
 class MissingArgumentsException(InvalidAPIParameterException):
     def __init__(self, missingArguments):
         super().__init__("Falta algún parámetro: {}".format(missingArguments), 418)
+
+class InvalidRemoveDisconnectedElementsTypeException(InvalidAPIParameterException):
+    def __init__(self):
+        super().__init__("remove_disconnected_elements debe ser un valor booleano: 'true' o 'false'.", 419)

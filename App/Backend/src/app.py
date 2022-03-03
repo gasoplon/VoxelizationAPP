@@ -1,3 +1,4 @@
+import re
 from flask import Flask, request, jsonify
 from config import config
 from utils import *
@@ -43,31 +44,32 @@ app.register_error_handler(NotAllowedFileExtensionException, invalid_api_usage)
 app.register_error_handler(MissingArgumentsException, invalid_api_usage)
 
 # Método de apoyo para enviar respuesta
-def sendResponse(exc):
-    response = jsonify({'message': "OK" })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response, exc.code
+# def sendResponse(exc):
+#     response = jsonify({'message': "OK" })
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     return response, exc.code
 
 @app.route('/api/uploadFile', methods=['POST'])
 def receive_file():
     # PARÁMETROS DE ENTRADA
-    # Analizar el fichero de entrada
-    response = jsonify({'message': 'Ok'})
-    return response
-    file = checkFileUploaded(request.files)
-
+    # ==============================================================
     # Resolucion para la voxelización
-    resolution = request.form['resolutionVoxel']
-    
+    try:
+        resolution = request.form['resolutionVoxel']
+    except KeyError as e:
+        resolution = None
     # Usar eliminar elementos inconexos
-    removeDisconnectedElements = bool(request.form['useRemoveDisconnected'])
+    try:
+        removeDisconnectedElements = request.form['useRemoveDisconnected']
+    except KeyError as e:
+        removeDisconnectedElements = None
 
     missingArguments = []
     if(not resolution):
         missingArguments.append("resolution")
     if(not removeDisconnectedElements):
         missingArguments.append("remove_disconnected_elements")
-    if(not file):
+    if(not request.files or len(request.files) != 1):
         missingArguments.append("file")
 
     if(len(missingArguments) > 0):
@@ -79,10 +81,18 @@ def receive_file():
         raise InvalidResolutionTypeException
 
     if(resolution > 24 or resolution < 1):
-            raise InvalidResolutionRangeException    
+            raise InvalidResolutionRangeException 
+    
+    if(removeDisconnectedElements not in ['true', 'false']):
+        raise InvalidRemoveDisconnectedElementsTypeException
+
+    removeDisconnectedElements = bool(removeDisconnectedElements)
 
 
+    # Analizar el fichero de entrada
+    file = checkFileUploaded(request.files)
 
+    # ==============================================================
     # Guardar archivo y voxelizar figura
     if file:
         new_UUID = uuid.uuid1()

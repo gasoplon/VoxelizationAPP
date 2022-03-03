@@ -1,0 +1,564 @@
+{
+	"info": {
+		"_postman_id": "73a068d7-fb13-4aad-afa0-658682224c8f",
+		"name": "TFG - Pruebas API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Petición correcta",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "4",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resolución fuera de rango",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "-1",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Resolución tipo erróneo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "asd",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "URD valor erróneo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "4",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "truee",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "URD valor erróneo 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "4",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "True",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Extensión errónea",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "4",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.mtl"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sin parámetro Resolución",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "-1",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sin parámetro useRemoveDisconnected",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "-1",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default",
+							"disabled": true
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sin parámetro fileUploaded",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "-1",
+							"type": "default",
+							"disabled": true
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default",
+							"disabled": true
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sin parámetros",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "-1",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pruebas",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resolutionVoxel",
+							"value": "4",
+							"type": "default"
+						},
+						{
+							"key": "useRemoveDisconnected",
+							"value": "true",
+							"type": "default"
+						},
+						{
+							"key": "fileUploaded",
+							"type": "file",
+							"src": "/C:/Users/david/Documents/Git Repositories/VoxelizationAPP/Examples/Cuerpo.obj"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/uploadFile",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"uploadFile"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
