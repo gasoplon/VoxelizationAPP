@@ -1,4 +1,3 @@
-import re
 from flask import Flask, request, jsonify
 from config import config
 from utils import *
@@ -7,6 +6,8 @@ from Exceptions import *
 import uuid
 import coloredlogs
 import logging
+
+import ERROR_CODES 
 
 #TODO: Implementar API KEY https://geekflare.com/es/securing-flask-api-with-jwt/
 def create_app(enviroment):
@@ -30,18 +31,18 @@ uploads_dir = os.path.join(config['DIRECTORY_UPLOADED_FILE'])
 os.makedirs(uploads_dir, exist_ok=True)
 
 # Manejo de errores
+# TODO: Cambiar codigo de vuelta
 def invalid_api_usage(e):
-    # response = jsonify({'status': e.to_dict()})
-    # response.headers.add('Access-Control-Allow-Origin', '*')
-    # return response, e.status_code
-    return jsonify(e.to_dict())
+    response = jsonify(e.to_dict())
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response, 300
 
 # Registro de manejadores
 app.register_error_handler(InvalidAPIParameterException, invalid_api_usage)
-app.register_error_handler(InvalidResolutionRangeException, invalid_api_usage)
-app.register_error_handler(InvalidResolutionTypeException, invalid_api_usage)
-app.register_error_handler(NotAllowedFileExtensionException, invalid_api_usage)
-app.register_error_handler(MissingArgumentsException, invalid_api_usage)
+# app.register_error_handler(InvalidResolutionRangeException, invalid_api_usage)
+# app.register_error_handler(InvalidResolutionTypeException, invalid_api_usage)
+# app.register_error_handler(NotAllowedFileExtensionException, invalid_api_usage)
+# app.register_error_handler(MissingArgumentsException, invalid_api_usage)
 
 # Método de apoyo para enviar respuesta
 # def sendResponse(exc):
@@ -73,18 +74,18 @@ def receive_file():
         missingArguments.append("file")
 
     if(len(missingArguments) > 0):
-        raise MissingArgumentsException(missingArguments)
+        raise InvalidAPIParameterException(ERROR_CODES.MISSING_PARAMETERS_ERROR_013, missingArguments)
 
     try:
         resolution = int(resolution)
     except ValueError as exc:
-        raise InvalidResolutionTypeException
+        raise InvalidAPIParameterException(ERROR_CODES.INVALID_RESOLUTION_TYPE_ERROR_011)
 
     if(resolution > 24 or resolution < 1):
-            raise InvalidResolutionRangeException 
+            raise  InvalidAPIParameterException(ERROR_CODES.INVALID_RESOLUTION_RANGE_ERROR_010)
     
     if(removeDisconnectedElements not in ['true', 'false']):
-        raise InvalidRemoveDisconnectedElementsTypeException
+        raise InvalidAPIParameterException(ERROR_CODES.INVALID_REMOVE_DISCONNECTED_ELEMENTS_TYPE_ERROR_014)
 
     removeDisconnectedElements = bool(removeDisconnectedElements)
 

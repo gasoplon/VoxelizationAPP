@@ -1,5 +1,6 @@
 import logging
 import os
+import ERROR_CODES
 from Exceptions import *
 from config import config
 
@@ -22,7 +23,7 @@ def checkFileUploaded(files):
     logger.debug(file)
         
     if not allowed_file_extension(file.filename):
-        raise NotAllowedFileExtensionException
+        raise InvalidAPIParameterException(ERROR_CODES.NOT_ALLOWED_FILE_EXTENSION_ERROR_012)
     
     return file
 
