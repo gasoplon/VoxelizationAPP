@@ -8,4 +8,4 @@ config = {
     'development': DevelopmentConfig,
     'DIRECTORY_UPLOADED_FILE': 'filesUploaded',
     'FILES_PROCESSED':'filesProcessed'
-}
+    }

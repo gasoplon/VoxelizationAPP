@@ -3,11 +3,12 @@ import os
 import ERROR_CODES
 from Exceptions import *
 from config import config
+from re import *
 
 # Constantes
 FILE_NAME = 'fileUploaded'
 ALLOWED_EXTENSIONS = {'obj'}
-BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/blender_script.py -- {} {} {} {}'
+BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {}'
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -32,6 +33,9 @@ def voxelization(file_name, resolution = 4, removeDisconnectedElements = False):
     # os.system(BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name))
     formatted_command = BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements)
     output = os.popen(formatted_command)
-    logger.debug(output.read())
-    # logger.debug(output.returncode)
+    errors = findall("ERR_CODE: \d",output.read())
+    logger.error(errors)
+    for e in errors:
+        if('1' in e):
+            raise InvalidAPIParameterException(ERROR_CODES.NO_SINGLE_ELEMENT_IN_FILE_ERROR_030)
     return None

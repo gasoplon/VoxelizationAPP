@@ -36,6 +36,15 @@
 import bpy
 import sys
 
+# Constantes
+DESC_FORMAT = "ERR_CODE: {} - {}."
+
+# Errores
+errores = [{
+    'code': 1,
+    'desc': DESC_FORMAT.format(1, 'Existe mas de un objeto en el archivo OBJ')
+}]
+
 argv = sys.argv
 argv = argv[argv.index("--") + 1:] # get all args after "--"
 
@@ -50,7 +59,8 @@ bpy.ops.import_scene.obj(filepath=obj_in, axis_forward='-Z', axis_up='Y')
 # TODO: Comprobar que en la escena solo deba existir un elemento(o 4 que no sean Camera, Light o Cube) y otras figuras
 obj_name = bpy.data.objects.keys()
 if(len(obj_name) != 1):
-    sys.exit(400)
+    print(errores[1-1]['desc'])
+    exit(1)
 
 obj_selected = bpy.data.objects[0]
 

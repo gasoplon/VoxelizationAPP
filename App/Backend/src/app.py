@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from config import config
 from utils import *
 from Exceptions import *
+from flask_wtf.csrf import CSRFProtect
 
 import uuid
 import coloredlogs
@@ -22,6 +23,10 @@ coloredlogs.install(level='DEBUG')
 # Configuración
 enviroment = config['development']
 app = create_app(enviroment)
+# TODO: No funciona session cookie
+# TODO: Comprobar CSRF
+# app.secret_key = "secret_key"
+# csrf = CSRFProtect(app)
 
 # Directorio de subida de archivos
 # if not os.path.exists(config['DIRECTORY_UPLOADED_FILE']):
