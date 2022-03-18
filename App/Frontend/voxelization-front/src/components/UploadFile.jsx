@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Slider, Checkbox, FormControlLabel } from "@mui/material";
-import Box from "@mui/material/Box";
+import { Slider, Checkbox, FormControlLabel, Box } from "@mui/material";
+import SelectObject from "./SelectObject";
 
 export function UploadFile() {
   // CTES
@@ -12,6 +12,7 @@ export function UploadFile() {
   const [errores, setErrors] = useState("");
   const [resolutionVoxel, setResolutionVoxel] = useState(DEFAULT_RESOLUTION);
   const [useRemoveDisconnected, setUseRemoveDisconnected] = useState(true);
+  const [selectedObject, setSelectedObject] = useState("");
 
   //MANEJADORES
   const handleResolutionChange = (event, newValue) => {
@@ -22,6 +23,9 @@ export function UploadFile() {
   };
   const onFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
+  };
+  const handleObjectChange = (value) => {
+    setSelectedObject(value);
   };
   // On file upload (click the upload button)
   const onFileUpload = () => {
@@ -109,6 +113,11 @@ export function UploadFile() {
           }
           label="Eliminar elementos inconexos."
         />
+        <SelectObject
+          setObjectSelected={handleObjectChange}
+          values={["Prueba"]}
+        ></SelectObject>
+
         {/* <Slider
           defaultValue={50}
           aria-label="Default"
