@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Slider, Checkbox, FormControlLabel, Box } from "@mui/material";
 import SelectObject from "./SelectObject";
+import RenderBox from "./RenderBox";
 
 export function UploadFile() {
   // CTES
@@ -93,6 +94,7 @@ export function UploadFile() {
     <div
       style={{ border: "1px solid black", margin: "5px", textAlign: "center" }}
     >
+      <RenderBox></RenderBox>
       <h1>Componente de carga(Pruebas de Algoritmo)</h1>
       <br />
       <h3>Resolución:</h3>
