@@ -8,13 +8,16 @@ import uuid
 import coloredlogs
 import logging
 
-import ERROR_CODES 
+import ERROR_CODES
 
-#TODO: Implementar API KEY https://geekflare.com/es/securing-flask-api-with-jwt/
+# TODO: Implementar API KEY https://geekflare.com/es/securing-flask-api-with-jwt/
+
+
 def create_app(enviroment):
     app = Flask(__name__)
     app.config.from_object(enviroment)
     return app
+
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -34,13 +37,18 @@ app = create_app(enviroment)
 # TODO: Y si no existe el directorio?
 uploads_dir = os.path.join(config['DIRECTORY_UPLOADED_FILE'])
 os.makedirs(uploads_dir, exist_ok=True)
+processed_dir = os.path.join(config['DIRECTORY_FILES_PROCESSED'])
+os.makedirs(processed_dir, exist_ok=True)
 
 # Manejo de errores
 # TODO: Cambiar codigo de vuelta
+
+
 def invalid_api_usage(e):
     response = jsonify(e.to_dict())
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 300
+
 
 # Registro de manejadores
 app.register_error_handler(InvalidAPIParameterException, invalid_api_usage)
@@ -54,6 +62,7 @@ app.register_error_handler(InvalidAPIParameterException, invalid_api_usage)
 #     response = jsonify({'message': "OK" })
 #     response.headers.add('Access-Control-Allow-Origin', '*')
 #     return response, exc.code
+
 
 @app.route('/api/uploadFile', methods=['POST'])
 def receive_file():
@@ -79,21 +88,24 @@ def receive_file():
         missingArguments.append("file")
 
     if(len(missingArguments) > 0):
-        raise InvalidAPIParameterException(ERROR_CODES.MISSING_PARAMETERS_ERROR_013, missingArguments)
+        raise InvalidAPIParameterException(
+            ERROR_CODES.MISSING_PARAMETERS_ERROR_013, missingArguments)
 
     try:
         resolution = int(resolution)
     except ValueError as exc:
-        raise InvalidAPIParameterException(ERROR_CODES.INVALID_RESOLUTION_TYPE_ERROR_011)
+        raise InvalidAPIParameterException(
+            ERROR_CODES.INVALID_RESOLUTION_TYPE_ERROR_011)
 
     if(resolution > 24 or resolution < 1):
-            raise  InvalidAPIParameterException(ERROR_CODES.INVALID_RESOLUTION_RANGE_ERROR_010)
-    
+        raise InvalidAPIParameterException(
+            ERROR_CODES.INVALID_RESOLUTION_RANGE_ERROR_010)
+
     if(removeDisconnectedElements not in ['true', 'false']):
-        raise InvalidAPIParameterException(ERROR_CODES.INVALID_REMOVE_DISCONNECTED_ELEMENTS_TYPE_ERROR_014)
+        raise InvalidAPIParameterException(
+            ERROR_CODES.INVALID_REMOVE_DISCONNECTED_ELEMENTS_TYPE_ERROR_014)
 
     removeDisconnectedElements = bool(removeDisconnectedElements)
-
 
     # Analizar el fichero de entrada
     file = checkFileUploaded(request.files)
@@ -106,17 +118,11 @@ def receive_file():
         file.save(os.path.join(uploads_dir, file_name))
 
         # Voxelization Algorithm
-        voxelization(file_name, resolution, removeDisconnectedElements);
-
-
+        voxelization(file_name, resolution, removeDisconnectedElements)
 
     # TODO: Texturing.......
 
-
-
     # TODO: Minecraft Command.......
-
-
 
     # TODO: Send OK, archivo, comando...
     response = jsonify({'message': 'Ok'})

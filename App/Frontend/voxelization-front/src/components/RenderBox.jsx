@@ -34,14 +34,6 @@ export function RenderBox(props) {
     scene.add(light);
     // Plano
     scene.add(new THREE.GridHelper(40, 10, 0x888888, 0x444444));
-    // var geo = new THREE.PlaneBufferGeometry(20, 20, 8, 8);
-    // var mat = new THREE.MeshBasicMaterial({
-    //   color: 0x84a198,
-    //   side: THREE.DoubleSide,
-    // });
-    // geo.rotateX(1.5708);
-    // var plane = new THREE.Mesh(geo, mat);
-    // scene.add(plane);
 
     // Controles
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -56,6 +48,7 @@ export function RenderBox(props) {
       "./demos-models/Cuerpo.obj",
       // called when resource is loaded
       function (object) {
+        console.log(object.children);
         scene.add(object);
       },
       // called when loading is in progresses

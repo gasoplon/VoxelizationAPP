@@ -11,6 +11,7 @@ import {
 export function SelectObject(props) {
   const [selectedObject, setSelectedObject] = useState("");
 
+  // Manejador de selección de objeto
   const handleObjectChange = (event) => {
     setSelectedObject(event.target.value);
     props.setObjectSelected(event.target.value);

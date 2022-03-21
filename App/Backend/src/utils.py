@@ -36,7 +36,7 @@ def checkFileUploaded(files):
 def voxelization(file_name, resolution=4, removeDisconnectedElements=False):
     # os.system(BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name))
     formatted_command = BLENDER_COMMAND.format(
-        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements)
+        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements)
     output = os.popen(formatted_command)
     print(output.read())
     errors = findall("ERR_CODE: \d", output.read())

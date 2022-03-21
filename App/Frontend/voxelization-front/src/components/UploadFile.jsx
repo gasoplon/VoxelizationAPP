@@ -3,6 +3,7 @@ import axios from "axios";
 import { Slider, Checkbox, FormControlLabel, Box } from "@mui/material";
 import SelectObject from "./SelectObject";
 import RenderBox from "./RenderBox";
+import * as Constants from "../constants.js";
 
 export function UploadFile() {
   // CTES
@@ -49,7 +50,7 @@ export function UploadFile() {
     // Request made to the backend api
     // Send formData object
     axios
-      .post("http://localhost:5000/api/uploadFile", formData)
+      .post(Constants.API_UPLOAD_FILE_URL, formData)
       .then((resp) => {
         console.log(resp.data);
       })
