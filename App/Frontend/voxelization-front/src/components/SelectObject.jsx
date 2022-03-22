@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import {
-  InputLabel,
-  MenuItem,
-  FormControl,
-  Select,
-  FormHelperText,
-} from "@mui/material";
+import { MenuItem, FormControl, Select, FormHelperText } from "@mui/material";
 import * as Constants from "../constants.js";
 
 export function SelectObject(props) {
@@ -34,10 +28,10 @@ export function SelectObject(props) {
 
   return (
     <FormControl fullWidth>
-      <Select value={selectedObject} displayEmpty onChange={handleObjectChange}>
-        {/* <MenuItem value="">
-          <em>Objeto no seleccionado</em>
-        </MenuItem> */}
+      <Select value={selectedObject} onChange={handleObjectChange}>
+        <MenuItem value="" disabled={!props.render}>
+          <em>Archivo subido</em>
+        </MenuItem>
         {ItemsValues()}
       </Select>
       <FormHelperText>Seleccione un elemento</FormHelperText>
@@ -47,6 +41,7 @@ export function SelectObject(props) {
 
 SelectObject.propTypes = {
   setObjectSelected: PropTypes.func.isRequired,
+  render: PropTypes.bool.isRequired,
 };
 
 export default SelectObject;

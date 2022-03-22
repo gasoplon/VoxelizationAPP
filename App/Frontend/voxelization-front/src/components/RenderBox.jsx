@@ -2,7 +2,7 @@ import React, { useEffect, createRef, useState } from "react";
 import * as THREE from "three";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as Constants from "../constants.js";
+import PropTypes from "prop-types";
 
 export function RenderBox(props) {
   // Crea la refencia para instanciar el render en un DIV
@@ -13,37 +13,43 @@ export function RenderBox(props) {
 
   // Escena
   var scene = new THREE.Scene();
+
   // Camara
   var camera = new THREE.PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight
   );
+  // Render
   var renderer = new THREE.WebGLRenderer();
+
+  // Controles
   const controls = new OrbitControls(camera, renderer.domElement);
+
   // Repintar
   const animate = function () {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
   };
-  useEffect(() => {
-    // loadObject();
-    animate();
-  }, [props.selectedModelPath]);
+  // useEffect(() => {
+  //   // loadObject();
+  //   animate();
+  // }, [props.selectedModelPath]);
 
   const loadObject = () => {
     loader.load(
-      // resource URL
+      // Archivo de carga
       props.selectedModelPath,
-      // called when resource is loaded
+      // LLamada cuando se termina de cargar el objeto
       function (object) {
         scene.add(object);
       },
-      // called when loading is in progresses
+      // Llamada cuando está siendo cargado
+      //TODO: Quitar
       function (xhr) {
         console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
       },
-      // called when loading has errors
+      // TODO: Tratar errores
       function (error) {
         console.log("An error happened");
       }
@@ -52,17 +58,17 @@ export function RenderBox(props) {
 
   // componentDidMount componentDidUpdate
   useEffect(() => {
-    console.log(canvasRef.current.children[0]);
+    // Eliminamos el anterior
     if (canvasRef.current.children[0] !== undefined)
       canvasRef.current.removeChild(canvasRef.current.children[0]);
-    // scene = new THREE.Scene();
+
     // Background
     scene.background = new THREE.Color(0xbfe3dd);
 
+    // Camara
     camera.position.set(0, 20, 50);
 
     // Render
-
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     canvasRef.current.appendChild(renderer.domElement);
@@ -70,6 +76,7 @@ export function RenderBox(props) {
     // Luz
     const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
     scene.add(light);
+
     // Plano
     scene.add(new THREE.GridHelper(40, 10, 0x888888, 0x444444));
 
@@ -82,9 +89,14 @@ export function RenderBox(props) {
     // OBJ Loader
     loadObject();
 
+    // Animar
     animate();
-  });
+  }, [props.selectedModelPath]);
   return <div ref={canvasRef} />;
 }
+
+RenderBox.propTypes = {
+  selectedModelPath: PropTypes.string.isRequired,
+};
 
 export default RenderBox;

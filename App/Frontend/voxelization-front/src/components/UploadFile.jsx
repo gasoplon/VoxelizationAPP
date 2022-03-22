@@ -6,8 +6,6 @@ import RenderBox from "./RenderBox";
 import * as Constants from "../constants.js";
 
 export function UploadFile() {
-  // CTES
-
   //Estados del componente
   const [selectedFile, setSelectedFile] = useState(null);
   const [errores, setErrors] = useState("");
@@ -121,7 +119,10 @@ export function UploadFile() {
           }
           label="Eliminar elementos inconexos."
         />
-        <SelectObject setObjectSelected={handleObjectChange}></SelectObject>
+        <SelectObject
+          setObjectSelected={handleObjectChange}
+          render={selectedFile ? true : false}
+        ></SelectObject>
       </Box>
       <div>
         <input type="file" onChange={onFileChange} />
