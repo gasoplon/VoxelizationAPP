@@ -7,14 +7,17 @@ import * as Constants from "../constants.js";
 
 export function UploadFile() {
   // CTES
-  const DEFAULT_RESOLUTION = 4;
 
   //Estados del componente
   const [selectedFile, setSelectedFile] = useState(null);
   const [errores, setErrors] = useState("");
-  const [resolutionVoxel, setResolutionVoxel] = useState(DEFAULT_RESOLUTION);
+  const [resolutionVoxel, setResolutionVoxel] = useState(
+    Constants.DEFAULT_VOXELIZATION_RESOLUTION
+  );
   const [useRemoveDisconnected, setUseRemoveDisconnected] = useState(true);
-  const [selectedObject, setSelectedObject] = useState("");
+  const [selectedObject, setSelectedObject] = useState(
+    Constants.DEFAULT_MODEL_PATH
+  );
 
   //MANEJADORES
   const handleResolutionChange = (event, newValue) => {
@@ -27,7 +30,9 @@ export function UploadFile() {
     setSelectedFile(event.target.files[0]);
   };
   const handleObjectChange = (value) => {
-    setSelectedObject(value);
+    setSelectedObject(
+      Constants.ROOT_MODELS_DEMOS_PATH + value + Constants.DEMOS_EXTENSION
+    );
   };
   // On file upload (click the upload button)
   const onFileUpload = () => {
@@ -95,13 +100,13 @@ export function UploadFile() {
     <div
       style={{ border: "1px solid black", margin: "5px", textAlign: "center" }}
     >
-      <RenderBox></RenderBox>
+      <RenderBox selectedModelPath={selectedObject}></RenderBox>
       <h1>Componente de carga(Pruebas de Algoritmo)</h1>
       <br />
       <h3>Resolución:</h3>
       <Box sx={{ width: "40%", margin: "auto" }}>
         <Slider
-          defaultValue={DEFAULT_RESOLUTION}
+          defaultValue={Constants.DEFAULT_VOXELIZATION_RESOLUTION}
           aria-label="Default"
           valueLabelDisplay="auto"
           step={1}
@@ -116,20 +121,7 @@ export function UploadFile() {
           }
           label="Eliminar elementos inconexos."
         />
-        <SelectObject
-          setObjectSelected={handleObjectChange}
-          values={["Prueba"]}
-        ></SelectObject>
-
-        {/* <Slider
-          defaultValue={50}
-          aria-label="Default"
-          valueLabelDisplay="auto"
-          step={1}
-          marks
-          min={0}
-          max={20}
-        /> */}
+        <SelectObject setObjectSelected={handleObjectChange}></SelectObject>
       </Box>
       <div>
         <input type="file" onChange={onFileChange} />

@@ -7,9 +7,12 @@ import {
   Select,
   FormHelperText,
 } from "@mui/material";
+import * as Constants from "../constants.js";
 
 export function SelectObject(props) {
-  const [selectedObject, setSelectedObject] = useState("");
+  const [selectedObject, setSelectedObject] = useState(
+    Constants.DEMOS_MODELS[0]
+  );
 
   // Manejador de selección de objeto
   const handleObjectChange = (event) => {
@@ -18,8 +21,8 @@ export function SelectObject(props) {
   };
 
   const ItemsValues = () => {
-    if (props.values) {
-      return props.values.map((value) => {
+    if (Constants.DEMOS_MODELS) {
+      return Constants.DEMOS_MODELS.map((value) => {
         return (
           <MenuItem value={value} key={value}>
             {value}
@@ -32,9 +35,9 @@ export function SelectObject(props) {
   return (
     <FormControl fullWidth>
       <Select value={selectedObject} displayEmpty onChange={handleObjectChange}>
-        <MenuItem value="">
+        {/* <MenuItem value="">
           <em>Objeto no seleccionado</em>
-        </MenuItem>
+        </MenuItem> */}
         {ItemsValues()}
       </Select>
       <FormHelperText>Seleccione un elemento</FormHelperText>
@@ -43,7 +46,6 @@ export function SelectObject(props) {
 }
 
 SelectObject.propTypes = {
-  values: PropTypes.arrayOf(PropTypes.string).isRequired,
   setObjectSelected: PropTypes.func.isRequired,
 };
 
