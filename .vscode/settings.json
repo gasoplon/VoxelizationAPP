@@ -3,6 +3,10 @@
         {
             "filePath": "App\\Frontend\\voxelization-front\\node_modules\\three",
             "group": "Default"
+        },
+        {
+            "filePath": "App\\Frontend\\voxelization-front\\node_modules\\@mui",
+            "group": "Default"
         }
     ]
 }

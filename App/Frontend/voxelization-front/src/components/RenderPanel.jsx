@@ -4,20 +4,23 @@ import { Slider, Checkbox, FormControlLabel, Box } from "@mui/material";
 import SelectObject from "./SelectObject";
 import RenderBox from "./RenderBox";
 import * as Constants from "../constants.js";
+import SelectListObject from "./SelectListObject";
 
-export function UploadFile() {
-  //Estados del componente
+export function RenderPanel() {
+  // ------------------- ESTADOS -----------------------------------------
+  // Panel configuracion
   const [selectedFile, setSelectedFile] = useState(null);
-  const [errores, setErrors] = useState("");
+  const [selectedObject, setSelectedObject] = useState(
+    Constants.DEFAULT_MODEL_PATH
+  );
   const [resolutionVoxel, setResolutionVoxel] = useState(
     Constants.DEFAULT_VOXELIZATION_RESOLUTION
   );
   const [useRemoveDisconnected, setUseRemoveDisconnected] = useState(true);
-  const [selectedObject, setSelectedObject] = useState(
-    Constants.DEFAULT_MODEL_PATH
-  );
+  // Errores
+  const [errores, setErrors] = useState("");
 
-  //MANEJADORES
+  // ------------------- MANEJADORES ---------------------------------------
   const handleResolutionChange = (event, newValue) => {
     setResolutionVoxel(newValue);
   };
@@ -70,8 +73,7 @@ export function UploadFile() {
       });
   };
 
-  // File content to be displayed after
-  // file upload is complete
+  // ------------------- DETALLES DE ARCHIVO ---------------------------------------
   const fileData = () => {
     if (selectedFile) {
       return (
@@ -94,6 +96,7 @@ export function UploadFile() {
     }
   };
 
+  // ------------------- RETURN ---------------------------------------
   return (
     <div
       style={{ border: "1px solid black", margin: "5px", textAlign: "center" }}
@@ -123,6 +126,7 @@ export function UploadFile() {
           setObjectSelected={handleObjectChange}
           render={selectedFile ? true : false}
         ></SelectObject>
+        <SelectListObject></SelectListObject>
       </Box>
       <div>
         <input type="file" onChange={onFileChange} />
@@ -138,4 +142,4 @@ export function UploadFile() {
   );
 }
 
-export default UploadFile;
+export default RenderPanel;

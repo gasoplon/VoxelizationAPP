@@ -1,10 +1,10 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { UploadFile } from "./components/UploadFile";
+import { RenderPanel } from "./components/RenderPanel";
 import React from "react";
 
 function App() {
-  return <UploadFile />;
+  return <RenderPanel />;
 }
 
 export default App;
