@@ -7,9 +7,13 @@ Para depurar la aplicación en el modo de desarrollo, puede usar una extensión 
 
 Otra herramienta interesante es React 360, que es una biblioteca utilizada para crear aplicaciones AR (realidad aumentada) y VR (realidad virtual).
 
-
+PC GRANDE
 cd E:\Documentos\Git Repositories\VoxelizationAPP\App\Backend\src
 "..\..\..\Python Enviroments\windows-env\Scripts\activate"
 
 E:\Documentos\Git Repositories\VoxelizationAPP\App\Frontend\voxelization-front\src
 
+
+PORTATIL
+C:\Users\david\Documents\Git Repositories\VoxelizationAPP\App\Backend\src>
+C:\Users\david\Documents\Git Repositories\VoxelizationAPP\App\Frontend\voxelization-front\src>

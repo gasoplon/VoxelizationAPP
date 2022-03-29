@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -8,63 +8,139 @@ import Divider from "@mui/material/Divider";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Typography from "@mui/material/Typography";
 import * as Constants from "../constants.js";
+import { v4 as uuidv4 } from "uuid";
+import PropTypes from "prop-types";
+
 export default function SelectedListItem(props) {
   // ------------------- ESTADOS -----------------------------------------
-
-  const [selectedIDFile, setSelectedIDFile] = React.useState(
-    props.filesUploaded.files[0].id
+  // Estado con la estructura de datos para los archivos
+  const [filesUploadedItems, setFilesUploadedItems] = React.useState(
+    initJSONDataFileStructure()
   );
-
+  // Archivo seleccionado actualmente
+  const [selectedIDFile, setSelectedIDFile] = React.useState();
+  useEffect(() => {
+    // Inicializar estado
+    if (filesUploadedItems.files) {
+      var keys = Object.keys(filesUploadedItems.files);
+      setSelectedIDFile(keys[0]);
+    }
+  }, []);
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
     setSelectedIDFile(id);
+    props.handleSelectedFileChange(filesUploadedItems.files[id]);
+  };
+  const handleDelete = (event, key) => {
+    delete filesUploadedItems.files[key];
+  };
+  const handleFileUploaded = (event) => {
+    var newStructure = createFileDataStructure(
+      event.target.files[0].name,
+      Constants.DEMOS_EXTENSION,
+      "",
+      false,
+      event.target.files[0]
+    );
+    addFileStructureToState(newStructure);
   };
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
+  function addFileStructureToState(newDataStructure) {
+    var newState = { ...filesUploadedItems };
+    newState.files[newState.numElements] = newDataStructure;
+    newState.numElements++;
+    setFilesUploadedItems(newState);
+  }
+  function createFileDataStructure(
+    fileName,
+    extension,
+    prePath,
+    isDemoFile,
+    file = null
+  ) {
+    var jsonObj = {};
+    jsonObj.id = uuidv4();
+    jsonObj.fileName = fileName;
+    jsonObj.isDemo = isDemoFile;
+    if (!isDemoFile) {
+      jsonObj.file = file;
+      jsonObj.pathFile = "";
+    } else {
+      jsonObj.file = "";
+      jsonObj.pathFile = prePath + fileName + extension;
+    }
+    return jsonObj;
+  }
+  function initJSONDataFileStructure() {
+    // Estructura global
+    var jsonObj = {};
+    jsonObj.numElements = 0;
+    jsonObj.files = {};
 
+    // Demos data
+    if (Constants.DEMOS_MODELS) {
+      Constants.DEMOS_MODELS.forEach((value) => {
+        // Crear estructura del archivo actual
+        var newDS = createFileDataStructure(
+          value,
+          ".obj",
+          Constants.ROOT_MODELS_DEMOS_PATH,
+          true
+        );
+        jsonObj.files[newDS.id] = newDS;
+        jsonObj.numElements++;
+      });
+    }
+    return jsonObj;
+  }
   // ------------------- ITEMS -----------------------------------------
   const DemosListItems = () => {
-    var files = props.filesUploaded.files;
+    var files = filesUploadedItems.files;
     var items = [];
     if (files) {
-      for (let i = 0; i < Object.keys(files).length; i++) {
-        if (files[i].isDemo) {
+      Object.keys(files).forEach((key) => {
+        if (files[key].isDemo) {
           items.push(
             <ListItemButton
-              key={files[i].id}
-              selected={selectedIDFile === files[i].id}
-              onClick={(event) => handleListItemClick(event, files[i].id)}
+              key={files[key].id}
+              selected={selectedIDFile === key}
+              onClick={(event) => handleListItemClick(event, key)}
             >
-              <ListItemText primary={files[i].fileName} />
+              <ListItemText primary={files[key].fileName} />
             </ListItemButton>
           );
         }
-      }
+      });
     }
     return items;
   };
 
   const UploadedFilesItems = () => {
-    // var files = props.filesUploaded.files;
-    // var items = [];
-    // if (files) {
-    //   for (let i = 0; i < Object.keys(files).length; i++) {
-    //     if (!files[i].isDemo) {
-    //       items.push(
-    //         <ListItemButton
-    //           key={files[i].id}
-    //           selected={selectedIDFile === files[i].id}
-    //           onClick={(event) => handleListItemClick(event, files[i].id)}
-    //         >
-    //           <ListItemText primary={files[i].fileName} />
-    //           <IconButton edge="end" aria-label="delete">
-    //             <DeleteIcon />
-    //           </IconButton>
-    //         </ListItemButton>
-    //       );
-    //     }
-    //   }
-    // }
-    // return items;
+    var files = filesUploadedItems.files;
+    var items = [];
+    if (files) {
+      Object.keys(files).forEach((key) => {
+        if (!files[key].isDemo) {
+          items.push(
+            <ListItemButton
+              key={files[key].id}
+              selected={selectedIDFile === key}
+              onClick={(event) => handleListItemClick(event, key)}
+            >
+              <ListItemText primary={files[key].fileName} />
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={(event) => handleDelete(event, key)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </ListItemButton>
+          );
+        }
+      });
+    }
+    return items;
   };
 
   // ------------------- RETURN -----------------------------------------
@@ -88,6 +164,15 @@ export default function SelectedListItem(props) {
         </Typography>
         {UploadedFilesItems()}
       </List>
+      <div>
+        <input type="file" onChange={handleFileUploaded} />
+        <button onClick={props.handleUploadFile}>Upload!</button>
+      </div>
     </Box>
   );
 }
+
+SelectedListItem.propTypes = {
+  handleUploadFile: PropTypes.func.isRequired,
+  handleSelectedFileChange: PropTypes.func.isRequired,
+};

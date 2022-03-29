@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import PropTypes from "prop-types";
 
 export function RenderBox(props) {
+  // THREE.Cache.enabled = true;
   // Crea la refencia para instanciar el render en un DIV
   const canvasRef = createRef();
 
@@ -37,23 +38,30 @@ export function RenderBox(props) {
   // }, [props.selectedModelPath]);
 
   const loadObject = () => {
-    loader.load(
-      // Archivo de carga
-      props.selectedModelPath,
-      // LLamada cuando se termina de cargar el objeto
-      function (object) {
-        scene.add(object);
-      },
-      // Llamada cuando está siendo cargado
-      //TODO: Quitar
-      function (xhr) {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-      },
-      // TODO: Tratar errores
-      function (error) {
-        console.log("An error happened");
-      }
-    );
+    if (props.selectedModel !== undefined) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        // image.src = e.target.result;
+      };
+      reader.readAsDataURL(props.selectedModel);
+    } else
+      loader.load(
+        // Archivo de carga
+        props.selectedModelPath,
+        // LLamada cuando se termina de cargar el objeto
+        function (object) {
+          scene.add(object);
+        },
+        // Llamada cuando está siendo cargado
+        //TODO: Quitar
+        function (xhr) {
+          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        },
+        // TODO: Tratar errores
+        function (error) {
+          console.log("An error happened");
+        }
+      );
   };
 
   // componentDidMount componentDidUpdate
@@ -91,12 +99,12 @@ export function RenderBox(props) {
 
     // Animar
     animate();
-  }, [props.selectedModelPath]);
+  }, [props.selectedModel]);
   return <div ref={canvasRef} />;
 }
 
 RenderBox.propTypes = {
-  selectedModelPath: PropTypes.string.isRequired,
+  // selectedModelPath: PropTypes.,
 };
 
 export default RenderBox;
