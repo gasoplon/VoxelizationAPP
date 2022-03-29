@@ -24,6 +24,7 @@ export default function SelectedListItem(props) {
     if (filesUploadedItems.files) {
       var keys = Object.keys(filesUploadedItems.files);
       setSelectedIDFile(keys[0]);
+      props.handleSelectedFileChange(filesUploadedItems.files[keys[0]]);
     }
   }, []);
   // ------------------- MANEJADORES -----------------------------------------
@@ -47,7 +48,7 @@ export default function SelectedListItem(props) {
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
   function addFileStructureToState(newDataStructure) {
     var newState = { ...filesUploadedItems };
-    newState.files[newState.numElements] = newDataStructure;
+    newState.files[newDataStructure.id] = newDataStructure;
     newState.numElements++;
     setFilesUploadedItems(newState);
   }
@@ -62,13 +63,9 @@ export default function SelectedListItem(props) {
     jsonObj.id = uuidv4();
     jsonObj.fileName = fileName;
     jsonObj.isDemo = isDemoFile;
-    if (!isDemoFile) {
-      jsonObj.file = file;
-      jsonObj.pathFile = "";
-    } else {
-      jsonObj.file = "";
-      jsonObj.pathFile = prePath + fileName + extension;
-    }
+    if (!isDemoFile) jsonObj.pathFile = URL.createObjectURL(file);
+    else jsonObj.pathFile = prePath + fileName + extension;
+
     return jsonObj;
   }
   function initJSONDataFileStructure() {

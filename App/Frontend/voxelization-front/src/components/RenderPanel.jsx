@@ -9,8 +9,7 @@ export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
   // PANEL DE CONF
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  // const [fileUploaded, setFileUploaded] = useState();
-  // Path del objeto seleccionado
+  // Información del objeto seleccionado
   const [selectedFile, setSelectedFile] = useState(
     Constants.DEFAULT_MODEL_PATH
   );
@@ -20,7 +19,6 @@ export function RenderPanel() {
   const [useRemoveDisconnected, setUseRemoveDisconnected] = useState(true);
   // ERRORES
   const [errores, setErrors] = useState("");
-  // ARCHIVOS
 
   // ------------------- MANEJADORES ---------------------------------------
 
@@ -29,12 +27,6 @@ export function RenderPanel() {
   };
   const handleUseRemoveDisconnected = (event, newValue) => {
     setUseRemoveDisconnected(newValue);
-  };
-  const onFileChange = (event) => {
-    setUploadedFiles(...uploadedFiles, event.target.files[0]);
-  };
-  const handleObjectChange = (value) => {
-    setSelectedFile(value);
   };
   // On file upload (click the upload button)
   const onFileUpload = () => {

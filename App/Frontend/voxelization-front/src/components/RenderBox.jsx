@@ -5,7 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import PropTypes from "prop-types";
 
 export function RenderBox(props) {
-  // THREE.Cache.enabled = true;
+  //TODO:  THREE.Cache.enabled = true;
   // Crea la refencia para instanciar el render en un DIV
   const canvasRef = createRef();
 
@@ -32,22 +32,12 @@ export function RenderBox(props) {
     controls.update();
     renderer.render(scene, camera);
   };
-  // useEffect(() => {
-  //   // loadObject();
-  //   animate();
-  // }, [props.selectedModelPath]);
 
   const loadObject = () => {
-    if (props.selectedModel !== undefined) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        // image.src = e.target.result;
-      };
-      reader.readAsDataURL(props.selectedModel);
-    } else
+    if (props.selectedModel && props.selectedModel.pathFile)
       loader.load(
         // Archivo de carga
-        props.selectedModelPath,
+        props.selectedModel.pathFile,
         // LLamada cuando se termina de cargar el objeto
         function (object) {
           scene.add(object);
@@ -103,8 +93,9 @@ export function RenderBox(props) {
   return <div ref={canvasRef} />;
 }
 
+//TODO:
 RenderBox.propTypes = {
-  // selectedModelPath: PropTypes.,
+  // selectedModel: PropTypes.any.isRequired,
 };
 
 export default RenderBox;
