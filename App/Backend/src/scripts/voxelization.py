@@ -45,6 +45,6 @@ modifier.use_remove_disconnected = bool(removeDisconnectedElements)
 
 
 # Save
-bpy.ops.export_scene.obj(filepath=obj_out, use_mesh_modifiers=True, axis_forward='-Z', axis_up='Y')
+bpy.ops.export_scene.obj(filepath=obj_out, use_mesh_modifiers=True, axis_forward='-Z', axis_up='Y', use_selection=True)
 
 ##################################################################################################################

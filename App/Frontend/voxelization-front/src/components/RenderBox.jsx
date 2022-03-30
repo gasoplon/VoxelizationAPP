@@ -32,6 +32,36 @@ export function RenderBox(props) {
     controls.update();
     renderer.render(scene, camera);
   };
+
+  const loadObject = () => {
+    if (props.selectedModel && props.selectedModel.pathFile)
+      loader.load(
+        // Archivo de carga
+        props.selectedModel.pathFile,
+        // LLamada cuando se termina de cargar el objeto
+        function (object) {
+          // console.log(object);
+          if (object && object.children && object.children.length === 1) {
+            scene.add(object);
+          } else {
+            // TODO: Set errors, eliminar hijos...
+            var new_state = { ...props.selectedModel };
+            new_state.errores.push(["WARN", "Demasiados objetos"]);
+            props.setSelectedModel(new_state);
+          }
+        },
+        // Llamada cuando está siendo cargado
+        //TODO: Quitar
+        function (xhr) {
+          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        },
+        // TODO: Tratar errores
+        function (error) {
+          console.log("An error happened");
+        }
+      );
+  };
+
   // componentDidMount componentDidUpdate
   useEffect(() => {
     // Eliminamos el anterior
@@ -64,30 +94,10 @@ export function RenderBox(props) {
 
     // OBJ Loader
     loadObject();
-
+    // console.log(scene);
     // Animar
     animate();
   }, [props.selectedModel]);
-  const loadObject = () => {
-    if (props.selectedModel && props.selectedModel.pathFile)
-      loader.load(
-        // Archivo de carga
-        props.selectedModel.pathFile,
-        // LLamada cuando se termina de cargar el objeto
-        function (object) {
-          scene.add(object);
-        },
-        // Llamada cuando está siendo cargado
-        //TODO: Quitar
-        function (xhr) {
-          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-        },
-        // TODO: Tratar errores
-        function (error) {
-          console.log("An error happened");
-        }
-      );
-  };
 
   return <div ref={canvasRef} />;
 }

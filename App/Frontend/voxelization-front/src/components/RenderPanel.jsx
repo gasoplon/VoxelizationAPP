@@ -4,6 +4,8 @@ import { Slider, Checkbox, FormControlLabel, Box } from "@mui/material";
 import RenderBox from "./RenderBox";
 import * as Constants from "../constants.js";
 import SelectListObject from "./SelectListObject";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
 
 export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
@@ -16,7 +18,7 @@ export function RenderPanel() {
   );
   const [useRemoveDisconnected, setUseRemoveDisconnected] = useState(true);
   // ERRORES
-  const [errores, setErrors] = useState("");
+  // const [errores, setErrors] = useState("");
 
   // ------------------- MANEJADORES ---------------------------------------
 
@@ -33,7 +35,7 @@ export function RenderPanel() {
 
     // Petición de obtención del archivo a partir de la URL
     var request = new XMLHttpRequest();
-    request.open("GET", selectedFile.pathFile, true);
+    request.open("GET", selectedFile.originalPathFile, true);
     request.responseType = "blob";
     request.onload = function () {
       var reader = new FileReader();
@@ -88,30 +90,37 @@ export function RenderPanel() {
     request.send();
   };
   // ------------------- FUNCIONES AUXILIARES ---------------------------------------
+  const handleResetOptions = () => {
+    setResolutionVoxel(Constants.DEFAULT_VOXELIZATION_RESOLUTION);
+    setUseRemoveDisconnected(true);
+  };
 
-  // ------------------- DETALLES DE ARCHIVO ---------------------------------------
-  // const fileData = () => {
-  //   if (uploadedFiles) {
-  //     return (
-  //       <div>
-  //         <h2>Detalles de archivo:</h2>
-  //         <p>Nombre del archivo: {uploadedFiles.name}</p>
-  //         <p>Tipo de archivo: {uploadedFiles.type}</p>
-  //         <p>
-  //           Última modificación: {uploadedFiles.lastModifiedDate.toDateString()}
-  //         </p>
-  //       </div>
-  //     );
-  //   } else {
-  //     return (
-  //       <div>
-  //         <br />
-  //         <h4>¡No ha seleccionado un archivo aún!</h4>
-  //       </div>
-  //     );
-  //   }
-  // };
-
+  const Errores = () => {
+    var errorsItems = [];
+    if (selectedFile && selectedFile.errores) {
+      selectedFile.errores.forEach((element) => {
+        switch (element[0]) {
+          case "ERROR":
+            errorsItems.push(
+              <Alert variant="filled" severity="error">
+                {element[1]}
+              </Alert>
+            );
+            break;
+          case "WARN":
+            errorsItems.push(
+              <Alert variant="filled" severity="warning">
+                {element[1]}
+              </Alert>
+            );
+            break;
+          default:
+            break;
+        }
+      });
+    }
+    return errorsItems;
+  };
   // ------------------- RETURN ---------------------------------------
   return (
     <div
@@ -123,7 +132,7 @@ export function RenderPanel() {
       <h3>Resolución:</h3>
       <Box sx={{ width: "40%", margin: "auto" }}>
         <Slider
-          defaultValue={Constants.DEFAULT_VOXELIZATION_RESOLUTION}
+          value={resolutionVoxel}
           aria-label="Default"
           valueLabelDisplay="auto"
           step={1}
@@ -134,22 +143,28 @@ export function RenderPanel() {
         />
         <FormControlLabel
           control={
-            <Checkbox defaultChecked onChange={handleUseRemoveDisconnected} />
+            <Checkbox
+              checked={useRemoveDisconnected}
+              onChange={handleUseRemoveDisconnected}
+            />
           }
           label="Eliminar elementos inconexos."
         />
         <SelectListObject
           handleUploadFile={onFileUpload}
           handleSelectedFileChange={setSelectedFile}
+          resetOptions={handleResetOptions}
         />
       </Box>
 
-      {errores && (
+      {/* {errores && (
         <h5 className="error" style={{ color: "red" }}>
           {errores}
         </h5>
-      )}
-      {/* {fileData()} */}
+      )} */}
+      <Stack sx={{ width: "50%" }} spacing={2}>
+        {Errores()}
+      </Stack>
     </div>
   );
 }

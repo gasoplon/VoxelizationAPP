@@ -29,6 +29,7 @@ export default function SelectedListItem(props) {
   }, []);
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
+    props.resetOptions();
     setSelectedIDFile(id);
     props.handleSelectedFileChange(filesUploadedItems.files[id]);
   };
@@ -63,6 +64,10 @@ export default function SelectedListItem(props) {
     jsonObj.id = uuidv4();
     jsonObj.fileName = fileName + extension;
     jsonObj.isDemo = isDemoFile;
+    jsonObj.errores = [
+      // ["ERROR", "Demasiados objetos"],
+      // ["WARN", "Demasiados objetos"],
+    ];
     if (!isDemoFile) {
       jsonObj.pathFile = URL.createObjectURL(file);
       jsonObj.originalPathFile = jsonObj.pathFile;
