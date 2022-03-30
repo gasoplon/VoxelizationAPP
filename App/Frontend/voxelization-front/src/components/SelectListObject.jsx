@@ -61,11 +61,15 @@ export default function SelectedListItem(props) {
   ) {
     var jsonObj = {};
     jsonObj.id = uuidv4();
-    jsonObj.fileName = fileName;
+    jsonObj.fileName = fileName + extension;
     jsonObj.isDemo = isDemoFile;
-    if (!isDemoFile) jsonObj.pathFile = URL.createObjectURL(file);
-    else jsonObj.pathFile = prePath + fileName + extension;
-
+    if (!isDemoFile) {
+      jsonObj.pathFile = URL.createObjectURL(file);
+      jsonObj.originalPathFile = jsonObj.pathFile;
+    } else {
+      jsonObj.pathFile = prePath + fileName + extension;
+      jsonObj.originalPathFile = prePath + fileName + extension;
+    }
     return jsonObj;
   }
   function initJSONDataFileStructure() {

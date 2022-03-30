@@ -7,8 +7,6 @@ import SelectListObject from "./SelectListObject";
 
 export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
-  // PANEL DE CONF
-  const [uploadedFiles, setUploadedFiles] = useState([]);
   // Información del objeto seleccionado
   const [selectedFile, setSelectedFile] = useState(
     Constants.DEFAULT_MODEL_PATH
@@ -30,40 +28,64 @@ export function RenderPanel() {
   };
   // On file upload (click the upload button)
   const onFileUpload = () => {
-    if (uploadedFiles === null) return;
-    // Create an object of formData
-    const formData = new FormData();
+    // En caso de no haber seleccionado un objeto
+    if (selectedFile === null) return;
 
-    // Update the formData object with file
-    formData.append("fileUploaded", uploadedFiles, uploadedFiles.name);
+    // Petición de obtención del archivo a partir de la URL
+    var request = new XMLHttpRequest();
+    request.open("GET", selectedFile.pathFile, true);
+    request.responseType = "blob";
+    request.onload = function () {
+      var reader = new FileReader();
+      reader.readAsDataURL(request.response);
 
-    // Update the formData object with resolution
-    formData.append("resolutionVoxel", resolutionVoxel);
+      // Cuando se haya leído
+      reader.onload = function (e) {
+        // Create an object of formData
+        const formData = new FormData();
 
-    // Update the formData object with resolution
-    formData.append("useRemoveDisconnected", useRemoveDisconnected);
+        // Update the formData object with file
+        formData.append(
+          "fileUploaded",
+          request.response,
+          selectedFile.fileName
+        );
 
-    // Details of the uploaded file
-    console.log(uploadedFiles);
+        // Update the formData object with resolution
+        formData.append("resolutionVoxel", resolutionVoxel);
 
-    // Request made to the backend api
-    // Send formData object
-    axios
-      .post(Constants.API_UPLOAD_FILE_URL, formData)
-      .then((resp) => {
-        console.log(resp.data);
-      })
-      .catch((err) => {
-        // const error = {
-        //   status: err.response["status"],
-        //   message: err.response["data"]["message"],
-        // };
-        // console.error(error);
-        console.error(err);
-        // console.error(err.message);
-        // console.error(err.request);
-        // setErrors(error["message"]);
-      });
+        // Update the formData object with resolution
+        formData.append("useRemoveDisconnected", useRemoveDisconnected);
+
+        // Details of the uploaded file
+        // console.log(e.target.result);
+
+        // Request made to the backend api
+        // Send formData object
+        axios
+          .post(Constants.API_UPLOAD_FILE_URL, formData)
+          .then((resp) => {
+            var myblob = new Blob([resp.data], {
+              type: "text/plain",
+            });
+            var state_copy = { ...selectedFile };
+            state_copy.pathFile = URL.createObjectURL(myblob);
+            setSelectedFile(state_copy);
+          })
+          .catch((err) => {
+            // const error = {
+            //   status: err.response["status"],
+            //   message: err.response["data"]["message"],
+            // };
+            // console.error(error);
+            console.error("ERR:" + err);
+            // console.error(err.message);
+            // console.error(err.request);
+            // setErrors(error["message"]);
+          });
+      };
+    };
+    request.send();
   };
   // ------------------- FUNCIONES AUXILIARES ---------------------------------------
 

@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from config import config
 from utils import *
 from Exceptions import *
 from flask_wtf.csrf import CSRFProtect
+from flask_cors import CORS, cross_origin
 
 import uuid
 import coloredlogs
@@ -15,6 +16,7 @@ import ERROR_CODES
 
 def create_app(enviroment):
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(enviroment)
     return app
 
@@ -109,9 +111,10 @@ def receive_file():
 
     # Analizar el fichero de entrada
     file = checkFileUploaded(request.files)
-
     # ==============================================================
     # Guardar archivo y voxelizar figura
+    new_UUID = None
+    file_name = None
     if file:
         new_UUID = uuid.uuid1()
         file_name = str(new_UUID) + '.obj'
@@ -126,7 +129,9 @@ def receive_file():
 
     # TODO: Send OK, archivo, comando...
     response = jsonify({'message': 'Ok'})
-    return response
+    # return response
+    # TODO: CODIGOS DE ERROR
+    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=str(new_UUID)+'.obj', as_attachment=True)
 
 
 if __name__ == '__main__':
