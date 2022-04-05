@@ -6,6 +6,7 @@ import * as Constants from "../constants.js";
 import SelectListObject from "./SelectListObject";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
+import { Notifications } from "./Notifications";
 
 export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
@@ -95,37 +96,12 @@ export function RenderPanel() {
     setUseRemoveDisconnected(true);
   };
 
-  const Errores = () => {
-    var errorsItems = [];
-    if (selectedFile && selectedFile.errores) {
-      selectedFile.errores.forEach((element) => {
-        switch (element[0]) {
-          case "ERROR":
-            errorsItems.push(
-              <Alert variant="filled" severity="error">
-                {element[1]}
-              </Alert>
-            );
-            break;
-          case "WARN":
-            errorsItems.push(
-              <Alert variant="filled" severity="warning">
-                {element[1]}
-              </Alert>
-            );
-            break;
-          default:
-            break;
-        }
-      });
-    }
-    return errorsItems;
-  };
   // ------------------- RETURN ---------------------------------------
   return (
     <div
       style={{ border: "1px solid black", margin: "5px", textAlign: "center" }}
     >
+      <Notifications></Notifications>
       <RenderBox selectedModel={selectedFile}></RenderBox>
       <h1>Componente de carga(Pruebas de Algoritmo)</h1>
       <br />
@@ -156,15 +132,6 @@ export function RenderPanel() {
           resetOptions={handleResetOptions}
         />
       </Box>
-
-      {/* {errores && (
-        <h5 className="error" style={{ color: "red" }}>
-          {errores}
-        </h5>
-      )} */}
-      <Stack sx={{ width: "50%" }} spacing={2}>
-        {Errores()}
-      </Stack>
     </div>
   );
 }

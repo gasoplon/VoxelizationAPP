@@ -4,7 +4,11 @@ import { RenderPanel } from "./components/RenderPanel";
 import React from "react";
 
 function App() {
-  return <RenderPanel />;
+  return (
+    <div>
+      <RenderPanel />
+    </div>
+  );
 }
 
 export default App;
