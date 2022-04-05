@@ -4,8 +4,10 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import IconButton from "@mui/material/IconButton";
 import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
+import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Typography from "@mui/material/Typography";
 import * as Constants from "../constants.js";
 import { v4 as uuidv4 } from "uuid";
@@ -134,13 +136,15 @@ export default function SelectedListItem(props) {
               onClick={(event) => handleListItemClick(event, key)}
             >
               <ListItemText primary={files[key].fileName} />
-              <IconButton
-                edge="end"
-                aria-label="delete"
-                onClick={(event) => handleDelete(event, key)}
-              >
-                <DeleteIcon />
-              </IconButton>
+              <Tooltip title="Delete">
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={(event) => handleDelete(event, key)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
             </ListItemButton>
           );
         }
@@ -159,21 +163,36 @@ export default function SelectedListItem(props) {
         border: "1px solid #000",
       }}
     >
-      <List component="nav" aria-label="main mailbox folders">
-        <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
-          Demos
-        </Typography>
-        {DemosListItems()}
-        {/* <Divider /> */}
-        <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
-          Archivos
-        </Typography>
-        {UploadedFilesItems()}
-      </List>
-      <div>
-        <input type="file" onChange={handleFileUploaded} />
-        <button onClick={props.handleUploadFile}>Upload!</button>
-      </div>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <List component="nav" aria-label="main mailbox folders">
+            <Typography
+              sx={{ mt: 1, mb: 1 }}
+              variant="subtitle2"
+              component="div"
+            >
+              Demos
+            </Typography>
+            {DemosListItems()}
+            {/* <Divider /> */}
+            <Typography
+              sx={{ mt: 1, mb: 1 }}
+              variant="subtitle2"
+              component="div"
+            >
+              Archivos
+            </Typography>
+            {UploadedFilesItems()}
+          </List>
+          <div>
+            <input type="file" onChange={handleFileUploaded} />
+            <button onClick={props.handleUploadFile}>Upload!</button>
+          </div>
+        </Grid>
+        <Grid item xs={6}>
+          xs=4
+        </Grid>
+      </Grid>
     </Box>
   );
 }
