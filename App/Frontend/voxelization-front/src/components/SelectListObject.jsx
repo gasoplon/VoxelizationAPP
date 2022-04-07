@@ -11,8 +11,8 @@ import Typography from "@mui/material/Typography";
 import * as Constants from "../constants.js";
 import { v4 as uuidv4 } from "uuid";
 import PropTypes from "prop-types";
-import Badge from "@mui/material/Badge";
-import DialogUploadTextures from "./DialogUploadTextures.jsx";
+import Button from "@mui/material/Button";
+import ListItem from "@mui/material/ListItem";
 
 export default function SelectedListItem(props) {
   // ------------------- ESTADOS -----------------------------------------
@@ -30,22 +30,23 @@ export default function SelectedListItem(props) {
       props.handleSelectedFileChange(filesUploadedItems.files[keys[0]]);
     }
   }, []);
-  // Dialogo abierto
-  const [open, setOpen] = React.useState(false);
-  // Adjuntos
-  const [attached, setAttached] = React.useState([]);
+
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
     props.resetOptions();
     setSelectedIDFile(id);
     props.handleSelectedFileChange(filesUploadedItems.files[id]);
   };
-  const handleDelete = (event, key) => {
-    delete filesUploadedItems.files[key];
+  const handleDelete = (event, id) => {
+    delete filesUploadedItems.files[id];
+    var newState = { ...filesUploadedItems };
+    newState.numElements--;
+    setFilesUploadedItems(newState);
+    document.getElementById("contained-button-file").value = null;
   };
   const handleFileUploaded = (event) => {
     var newStructure = createFileDataStructure(
-      event.target.files[0].name,
+      event.target.files[0].name.split(".")[0],
       Constants.DEMOS_EXTENSION,
       "",
       false,
@@ -53,15 +54,21 @@ export default function SelectedListItem(props) {
     );
     addFileStructureToState(newStructure);
   };
-  // Dialog
-  const handleClickOpen = (event, id) => {
-    setOpen(true);
+  const handleFileAttachedUploaded = (event) => {
+    //TODO: Change
+    var newStructure = createFileDataStructure(
+      event.target.files[0].name.split(".")[0],
+      Constants.DEMOS_EXTENSION,
+      "",
+      false,
+      event.target.files[0]
+    );
+    var newState = { ...filesUploadedItems };
+    newState.files[filesUploadedItems.files[2]].attached = newStructure;
+    setFilesUploadedItems(newState);
+    addFileStructureToState(newStructure);
   };
-  const handleClose = (value) => {
-    setOpen(false);
-    // TODO: Hacer lo correspondiente
-    // setSelectedValue(value);
-  };
+
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
   function addFileStructureToState(newDataStructure) {
     var newState = { ...filesUploadedItems };
@@ -84,6 +91,7 @@ export default function SelectedListItem(props) {
       // ["ERROR", "Demasiados objetos"],
       // ["WARN", "Demasiados objetos"],
     ];
+    jsonObj.attached = [];
     if (!isDemoFile) {
       jsonObj.pathFile = URL.createObjectURL(file);
       jsonObj.originalPathFile = jsonObj.pathFile;
@@ -150,18 +158,7 @@ export default function SelectedListItem(props) {
               onClick={(event) => handleListItemClick(event, key)}
             >
               <ListItemText primary={files[key].fileName} />
-              <Tooltip title="Add texture">
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={(event) => handleClickOpen(event, key)}
-                >
-                  {/* TODO: */}
-                  <Badge badgeContent={4} color="primary">
-                    <AddCircleOutlineIcon />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
+
               <Tooltip title="Delete">
                 <IconButton
                   edge="end"
@@ -172,6 +169,37 @@ export default function SelectedListItem(props) {
                 </IconButton>
               </Tooltip>
             </ListItemButton>
+          );
+        }
+      });
+    }
+    return items;
+  };
+
+  const UploadedAttachedItems = () => {
+    var files = filesUploadedItems.files;
+    var items = [];
+    if (files && files.attached) {
+      Object.keys(files.attached).forEach((key) => {
+        if (!files[key].isDemo) {
+          items.push(
+            <ListItem
+              key={files[key].attached[key]}
+              // selected={selectedIDFile === key}
+              // onClick={(event) => handleListItemClick(event, key)}
+            >
+              <ListItemText primary={files[key].fileName} />
+
+              <Tooltip title="Delete">
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={(event) => handleDelete(event, key)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </ListItem>
           );
         }
       });
@@ -199,16 +227,70 @@ export default function SelectedListItem(props) {
           Archivos
         </Typography>
         {UploadedFilesItems()}
+        {filesUploadedItems.numElements !== 2 && (
+          <div>
+            <Typography
+              sx={{ mt: 1, mb: 1 }}
+              variant="subtitle2"
+              component="div"
+            >
+              Adjuntos
+            </Typography>
+            {UploadedAttachedItems()}
+          </div>
+        )}
       </List>
-      <div>
-        <input type="file" onChange={handleFileUploaded} />
-        <button onClick={props.handleUploadFile}>Upload!</button>
-      </div>
-      <DialogUploadTextures
-        // selectedValue={selectedValue}
-        open={open}
-        onClose={handleClose}
+      <input
+        type="file"
+        hidden
+        id="contained-button-file"
+        onChange={handleFileUploaded}
       />
+      <label htmlFor="contained-button-file">
+        {filesUploadedItems.numElements === 2 && (
+          <Tooltip title="Upload new file">
+            <Button
+              sx={{ mt: 3, mb: 3 }}
+              variant="outlined"
+              color="primary"
+              component="span"
+              startIcon={<AddCircleOutlineIcon />}
+            >
+              Añadir archivo
+            </Button>
+          </Tooltip>
+        )}
+      </label>
+      <input
+        type="file"
+        hidden
+        id="contained-button-attached"
+        onChange={handleFileAttachedUploaded}
+      />
+      <label htmlFor="contained-button-file">
+        {filesUploadedItems.numElements !== 2 && (
+          <Tooltip title="Upload new attached file">
+            <Button
+              sx={{ mt: 3, mb: 3 }}
+              variant="outlined"
+              color="primary"
+              component="span"
+              startIcon={<AddCircleOutlineIcon />}
+            >
+              Añadir adjunto
+            </Button>
+          </Tooltip>
+        )}
+      </label>
+      <br />
+      <Button
+        onClick={props.handleUploadFile}
+        variant="contained"
+        color="primary"
+        component="span"
+      >
+        Upload!
+      </Button>
     </Box>
   );
 }
