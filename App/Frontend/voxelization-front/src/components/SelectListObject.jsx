@@ -4,7 +4,6 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import IconButton from "@mui/material/IconButton";
 import ListItemText from "@mui/material/ListItemText";
-import Grid from "@mui/material/Grid";
 import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -12,6 +11,8 @@ import Typography from "@mui/material/Typography";
 import * as Constants from "../constants.js";
 import { v4 as uuidv4 } from "uuid";
 import PropTypes from "prop-types";
+import Badge from "@mui/material/Badge";
+import DialogUploadTextures from "./DialogUploadTextures.jsx";
 
 export default function SelectedListItem(props) {
   // ------------------- ESTADOS -----------------------------------------
@@ -29,6 +30,10 @@ export default function SelectedListItem(props) {
       props.handleSelectedFileChange(filesUploadedItems.files[keys[0]]);
     }
   }, []);
+  // Dialogo abierto
+  const [open, setOpen] = React.useState(false);
+  // Adjuntos
+  const [attached, setAttached] = React.useState([]);
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
     props.resetOptions();
@@ -47,6 +52,15 @@ export default function SelectedListItem(props) {
       event.target.files[0]
     );
     addFileStructureToState(newStructure);
+  };
+  // Dialog
+  const handleClickOpen = (event, id) => {
+    setOpen(true);
+  };
+  const handleClose = (value) => {
+    setOpen(false);
+    // TODO: Hacer lo correspondiente
+    // setSelectedValue(value);
   };
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
   function addFileStructureToState(newDataStructure) {
@@ -136,6 +150,18 @@ export default function SelectedListItem(props) {
               onClick={(event) => handleListItemClick(event, key)}
             >
               <ListItemText primary={files[key].fileName} />
+              <Tooltip title="Add texture">
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={(event) => handleClickOpen(event, key)}
+                >
+                  {/* TODO: */}
+                  <Badge badgeContent={4} color="primary">
+                    <AddCircleOutlineIcon />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
               <Tooltip title="Delete">
                 <IconButton
                   edge="end"
@@ -163,36 +189,26 @@ export default function SelectedListItem(props) {
         border: "1px solid #000",
       }}
     >
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <List component="nav" aria-label="main mailbox folders">
-            <Typography
-              sx={{ mt: 1, mb: 1 }}
-              variant="subtitle2"
-              component="div"
-            >
-              Demos
-            </Typography>
-            {DemosListItems()}
-            {/* <Divider /> */}
-            <Typography
-              sx={{ mt: 1, mb: 1 }}
-              variant="subtitle2"
-              component="div"
-            >
-              Archivos
-            </Typography>
-            {UploadedFilesItems()}
-          </List>
-          <div>
-            <input type="file" onChange={handleFileUploaded} />
-            <button onClick={props.handleUploadFile}>Upload!</button>
-          </div>
-        </Grid>
-        <Grid item xs={6}>
-          xs=4
-        </Grid>
-      </Grid>
+      <List component="nav" aria-label="main mailbox folders">
+        <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
+          Demos
+        </Typography>
+        {DemosListItems()}
+        {/* <Divider /> */}
+        <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
+          Archivos
+        </Typography>
+        {UploadedFilesItems()}
+      </List>
+      <div>
+        <input type="file" onChange={handleFileUploaded} />
+        <button onClick={props.handleUploadFile}>Upload!</button>
+      </div>
+      <DialogUploadTextures
+        // selectedValue={selectedValue}
+        open={open}
+        onClose={handleClose}
+      />
     </Box>
   );
 }
