@@ -9,25 +9,29 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Typography from "@mui/material/Typography";
 import * as Constants from "../constants.js";
-import { v4 as uuidv4 } from "uuid";
 import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
 import ListItem from "@mui/material/ListItem";
+import {
+  FilesStructure,
+  SingleFileDataStructure,
+} from "../FileDataStructure.js";
 
 export default function SelectedListItem(props) {
   // ------------------- ESTADOS -----------------------------------------
   // Estado con la estructura de datos para los archivos
   const [filesUploadedItems, setFilesUploadedItems] = React.useState(
-    initJSONDataFileStructure()
+    new FilesStructure()
   );
   // Archivo seleccionado actualmente
   const [selectedIDFile, setSelectedIDFile] = React.useState();
   useEffect(() => {
     // Inicializar estado
-    if (filesUploadedItems.files) {
-      var keys = Object.keys(filesUploadedItems.files);
-      setSelectedIDFile(keys[0]);
-      props.handleSelectedFileChange(filesUploadedItems.files[keys[0]]);
+    var demosIDs = filesUploadedItems.demosFilesIDs();
+    if (demosIDs) {
+      var key = demosIDs[0];
+      setSelectedIDFile(key);
+      props.handleSelectedFileChange(filesUploadedItems.getFileByID(key));
     }
   }, []);
 
@@ -38,170 +42,116 @@ export default function SelectedListItem(props) {
     props.handleSelectedFileChange(filesUploadedItems.files[id]);
   };
   const handleDelete = (event, id) => {
-    delete filesUploadedItems.files[id];
-    var newState = { ...filesUploadedItems };
-    newState.numElements--;
-    setFilesUploadedItems(newState);
-    document.getElementById("contained-button-file").value = null;
+    var file = filesUploadedItems.getFileByID(id);
+    if (file.isAttached) {
+      filesUploadedItems.removeAttached(id);
+    } else {
+      file.removeAllAttachedFiles();
+      document.getElementById("contained-button-file").value = null;
+    }
+    setFilesUploadedItems(filesUploadedItems);
   };
   const handleFileUploaded = (event) => {
-    var newStructure = createFileDataStructure(
+    var newFile = new SingleFileDataStructure(
       event.target.files[0].name.split(".")[0],
       Constants.DEMOS_EXTENSION,
       "",
       false,
-      event.target.files[0]
+      event.target.files[0],
+      false
     );
-    addFileStructureToState(newStructure);
+    addFileStructureToState(newFile);
   };
   const handleFileAttachedUploaded = (event) => {
-    //TODO: Change
-    var newStructure = createFileDataStructure(
+    var newStructure = new SingleFileDataStructure(
       event.target.files[0].name.split(".")[0],
       Constants.DEMOS_EXTENSION,
       "",
       false,
-      event.target.files[0]
+      event.target.files[0],
+      true
     );
-    var newState = { ...filesUploadedItems };
-    newState.files[filesUploadedItems.files[2]].attached = newStructure;
-    setFilesUploadedItems(newState);
-    addFileStructureToState(newStructure);
+    addFileStructureToState(newStructure, true);
   };
 
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
-  function addFileStructureToState(newDataStructure) {
-    var newState = { ...filesUploadedItems };
-    newState.files[newDataStructure.id] = newDataStructure;
-    newState.numElements++;
-    setFilesUploadedItems(newState);
+  function addFileStructureToState(newDataStructure, isAttachedFile) {
+    if (isAttachedFile)
+      filesUploadedItems.fileUploaded.addAttachedFile(newDataStructure);
+    else filesUploadedItems.addUploadedFile(newDataStructure);
+    setFilesUploadedItems(filesUploadedItems);
+    setSelectedIDFile(newDataStructure.id);
   }
-  function createFileDataStructure(
-    fileName,
-    extension,
-    prePath,
-    isDemoFile,
-    file = null
-  ) {
-    var jsonObj = {};
-    jsonObj.id = uuidv4();
-    jsonObj.fileName = fileName + extension;
-    jsonObj.isDemo = isDemoFile;
-    jsonObj.errores = [
-      // ["ERROR", "Demasiados objetos"],
-      // ["WARN", "Demasiados objetos"],
-    ];
-    jsonObj.attached = [];
-    if (!isDemoFile) {
-      jsonObj.pathFile = URL.createObjectURL(file);
-      jsonObj.originalPathFile = jsonObj.pathFile;
-    } else {
-      jsonObj.pathFile = prePath + fileName + extension;
-      jsonObj.originalPathFile = prePath + fileName + extension;
-    }
-    return jsonObj;
-  }
-  function initJSONDataFileStructure() {
-    // Estructura global
-    var jsonObj = {};
-    jsonObj.numElements = 0;
-    jsonObj.files = {};
 
-    // Demos data
-    if (Constants.DEMOS_MODELS) {
-      Constants.DEMOS_MODELS.forEach((value) => {
-        // Crear estructura del archivo actual
-        var newDS = createFileDataStructure(
-          value,
-          ".obj",
-          Constants.ROOT_MODELS_DEMOS_PATH,
-          true
-        );
-        jsonObj.files[newDS.id] = newDS;
-        jsonObj.numElements++;
-      });
-    }
-    return jsonObj;
-  }
   // ------------------- ITEMS -----------------------------------------
   const DemosListItems = () => {
-    var files = filesUploadedItems.files;
+    var filesIDs = filesUploadedItems.demosFilesIDs();
     var items = [];
-    if (files) {
-      Object.keys(files).forEach((key) => {
-        if (files[key].isDemo) {
-          items.push(
-            <ListItemButton
-              key={files[key].id}
-              selected={selectedIDFile === key}
-              onClick={(event) => handleListItemClick(event, key)}
-            >
-              <ListItemText primary={files[key].fileName} />
-            </ListItemButton>
-          );
-        }
+    if (filesIDs) {
+      filesIDs.forEach((demoID) => {
+        items.push(
+          <ListItemButton
+            key={demoID}
+            selected={selectedIDFile === demoID}
+            onClick={(event) => handleListItemClick(event, demoID)}
+          >
+            <ListItemText
+              primary={filesUploadedItems.getFileByID(demoID).fileName}
+            />
+          </ListItemButton>
+        );
       });
     }
     return items;
   };
 
-  const UploadedFilesItems = () => {
-    var files = filesUploadedItems.files;
-    var items = [];
-    if (files) {
-      Object.keys(files).forEach((key) => {
-        if (!files[key].isDemo) {
-          items.push(
-            <ListItemButton
-              key={files[key].id}
-              selected={selectedIDFile === key}
-              onClick={(event) => handleListItemClick(event, key)}
-            >
-              <ListItemText primary={files[key].fileName} />
+  const UploadedFileItem = () => {
+    var file = filesUploadedItems.fileUploaded;
+    var item;
+    if (file) {
+      item = (
+        <ListItemButton
+          key={file.id}
+          selected={selectedIDFile === file.id}
+          onClick={(event) => handleListItemClick(event, file.id)}
+        >
+          <ListItemText primary={file.fileName} />
 
-              <Tooltip title="Delete">
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={(event) => handleDelete(event, key)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            </ListItemButton>
-          );
-        }
-      });
+          <Tooltip title="Delete">
+            <IconButton
+              edge="end"
+              aria-label="delete"
+              onClick={(event) => handleDelete(event, file.id)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </ListItemButton>
+      );
     }
-    return items;
+    return item;
   };
 
   const UploadedAttachedItems = () => {
-    var files = filesUploadedItems.files;
+    var file = filesUploadedItems.fileUploaded;
     var items = [];
-    if (files && files.attached) {
-      Object.keys(files.attached).forEach((key) => {
-        if (!files[key].isDemo) {
-          items.push(
-            <ListItem
-              key={files[key].attached[key]}
-              // selected={selectedIDFile === key}
-              // onClick={(event) => handleListItemClick(event, key)}
-            >
-              <ListItemText primary={files[key].fileName} />
+    if (file && file.attached) {
+      Object.keys(file.attached).forEach((key) => {
+        items.push(
+          <ListItem key={key}>
+            <ListItemText primary={file.attached[key].fileName} />
 
-              <Tooltip title="Delete">
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={(event) => handleDelete(event, key)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            </ListItem>
-          );
-        }
+            <Tooltip title="Delete">
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={(event) => handleDelete(event, key)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+        );
       });
     }
     return items;
@@ -226,8 +176,8 @@ export default function SelectedListItem(props) {
         <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
           Archivos
         </Typography>
-        {UploadedFilesItems()}
-        {filesUploadedItems.numElements !== 2 && (
+        {UploadedFileItem()}
+        {filesUploadedItems.fileUploaded && (
           <div>
             <Typography
               sx={{ mt: 1, mb: 1 }}
@@ -247,7 +197,7 @@ export default function SelectedListItem(props) {
         onChange={handleFileUploaded}
       />
       <label htmlFor="contained-button-file">
-        {filesUploadedItems.numElements === 2 && (
+        {!filesUploadedItems.fileUploaded && (
           <Tooltip title="Upload new file">
             <Button
               sx={{ mt: 3, mb: 3 }}
@@ -267,8 +217,8 @@ export default function SelectedListItem(props) {
         id="contained-button-attached"
         onChange={handleFileAttachedUploaded}
       />
-      <label htmlFor="contained-button-file">
-        {filesUploadedItems.numElements !== 2 && (
+      <label htmlFor="contained-button-attached">
+        {filesUploadedItems.fileUploaded && (
           <Tooltip title="Upload new attached file">
             <Button
               sx={{ mt: 3, mb: 3 }}
