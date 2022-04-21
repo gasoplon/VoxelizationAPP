@@ -4,28 +4,17 @@ import { v4 as uuidv4 } from "uuid";
 export class FilesStructure {
   //   #demos;
 
-  constructor() {
-    this.demos = {};
-    this.fileUploaded = undefined;
-
-    // Inicializa los DEMOS
-    if (Constants.DEMOS_MODELS) {
-      Constants.DEMOS_MODELS.forEach((value) => {
-        var newFile = new SingleFileDataStructure(
-          value,
-          ".obj",
-          Constants.ROOT_MODELS_DEMOS_PATH,
-          true
-        );
-        this.demos[newFile.id] = newFile;
-      });
-    }
+  constructor(fileUploaded = undefined, attachedFiles = {}) {
+    this.demos = DEMOS;
+    this.fileUploaded = fileUploaded;
+    this.attachedFiles = attachedFiles;
   }
 
   // GETTERS
   get allFilesIDs() {
     var keys = Object.keys(this.demos);
     if (this.fileUploaded) keys.push(this.fileUploaded.id);
+    if (this.attachedFiles) keys.push(this.attachedFiles);
     return keys;
   }
 
@@ -37,7 +26,8 @@ export class FilesStructure {
     var file = this.demos[ID];
     if (!file && this.fileUploaded && this.fileUploaded.id === ID)
       file = this.fileUploaded;
-    // else if (this.fileUploaded) file = this.fileUploaded.attached[ID];
+    else if (!file && this.fileUploaded && this.attachedFiles)
+      file = this.attachedFiles[ID];
     return file;
   }
 
@@ -45,14 +35,28 @@ export class FilesStructure {
     this.fileUploaded = newDataStructure;
   }
 
-  removeAttached(ID) {
-    delete this.attached[ID];
+  removeByID(ID) {
+    var file = this.getFileByID(ID);
+    if (file) {
+      if (file.isAttached) {
+        console.log(this.attachedFiles[ID]);
+        delete this.attachedFiles[ID];
+      } else {
+        this.attachedFiles = {};
+        this.fileUploaded = undefined;
+      }
+    }
+  }
+  addAttachedFile(newDataStructure) {
+    this.attachedFiles[newDataStructure.id] = newDataStructure;
+  }
+
+  clone() {
+    return new FilesStructure(this.fileUploaded, this.attachedFiles);
   }
 }
 
 export class SingleFileDataStructure {
-  attached;
-
   constructor(
     fileName,
     extension,
@@ -72,7 +76,6 @@ export class SingleFileDataStructure {
     if (isAttached) this.isAttached = true;
     else {
       this.isAttached = false;
-      this.attached = {};
     }
     if (!isDemoFile) {
       this.pathFile = URL.createObjectURL(file);
@@ -82,18 +85,17 @@ export class SingleFileDataStructure {
       this.originalPathFile = prePath + fileName + extension;
     }
   }
-  // GETTERS
-  //   get attached() {
-  //     return this.attached;
-  //   }
-
-  //METHODS
-  addAttachedFile(newDataStructure) {
-    this.attached[newDataStructure.id] = newDataStructure;
-  }
-
-  removeAllAttachedFiles() {
-    //TODO: Remove URLs generated
-    this.attached = {};
-  }
+}
+var DEMOS = {};
+// Inicializa los DEMOS
+if (Constants.DEMOS_MODELS) {
+  Constants.DEMOS_MODELS.forEach((value) => {
+    var newFile = new SingleFileDataStructure(
+      value,
+      ".obj",
+      Constants.ROOT_MODELS_DEMOS_PATH,
+      true
+    );
+    DEMOS[newFile.id] = newFile;
+  });
 }

@@ -39,17 +39,14 @@ export default function SelectedListItem(props) {
   const handleListItemClick = (event, id) => {
     props.resetOptions();
     setSelectedIDFile(id);
-    props.handleSelectedFileChange(filesUploadedItems.files[id]);
+    props.handleSelectedFileChange(filesUploadedItems.getFileByID(id));
   };
   const handleDelete = (event, id) => {
-    var file = filesUploadedItems.getFileByID(id);
-    if (file.isAttached) {
-      filesUploadedItems.removeAttached(id);
-    } else {
-      file.removeAllAttachedFiles();
-      document.getElementById("contained-button-file").value = null;
-    }
-    setFilesUploadedItems(filesUploadedItems);
+    var copy = filesUploadedItems.clone();
+    copy.removeByID(id);
+    document.getElementById("contained-button-file").value = null;
+    document.getElementById("contained-button-attached").value = null;
+    setFilesUploadedItems(copy);
   };
   const handleFileUploaded = (event) => {
     var newFile = new SingleFileDataStructure(
@@ -75,11 +72,11 @@ export default function SelectedListItem(props) {
   };
 
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
-  function addFileStructureToState(newDataStructure, isAttachedFile) {
-    if (isAttachedFile)
-      filesUploadedItems.fileUploaded.addAttachedFile(newDataStructure);
-    else filesUploadedItems.addUploadedFile(newDataStructure);
-    setFilesUploadedItems(filesUploadedItems);
+  function addFileStructureToState(newDataStructure, isAttachedFile = false) {
+    var copy = filesUploadedItems.clone();
+    if (isAttachedFile) copy.addAttachedFile(newDataStructure);
+    else copy.addUploadedFile(newDataStructure);
+    setFilesUploadedItems(copy);
     setSelectedIDFile(newDataStructure.id);
   }
 
@@ -133,13 +130,14 @@ export default function SelectedListItem(props) {
   };
 
   const UploadedAttachedItems = () => {
-    var file = filesUploadedItems.fileUploaded;
     var items = [];
-    if (file && file.attached) {
-      Object.keys(file.attached).forEach((key) => {
+    if (filesUploadedItems.attachedFiles) {
+      Object.keys(filesUploadedItems.attachedFiles).forEach((key) => {
         items.push(
           <ListItem key={key}>
-            <ListItemText primary={file.attached[key].fileName} />
+            <ListItemText
+              primary={filesUploadedItems.attachedFiles[key].fileName}
+            />
 
             <Tooltip title="Delete">
               <IconButton
