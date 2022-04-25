@@ -2,32 +2,28 @@ import * as Constants from "./constants.js";
 import { v4 as uuidv4 } from "uuid";
 
 export class FilesStructure {
-  //   #demos;
+  #demos;
+  fileUploaded;
 
-  constructor(fileUploaded = undefined, attachedFiles = {}) {
-    this.demos = DEMOS;
+  constructor(fileUploaded = undefined) {
+    this.#demos = DEMOS;
     this.fileUploaded = fileUploaded;
-    this.attachedFiles = attachedFiles;
   }
 
   // GETTERS
-  get allFilesIDs() {
-    var keys = Object.keys(this.demos);
-    if (this.fileUploaded) keys.push(this.fileUploaded.id);
-    if (this.attachedFiles) keys.push(this.attachedFiles);
+  get demosFilesIDs() {
+    var keys;
+    this.#demos ? (keys = Object.keys(this.#demos)) : (keys = []);
     return keys;
   }
 
-  demosFilesIDs() {
-    return Object.keys(this.demos);
-  }
-
+  // METODOS
   getFileByID(ID) {
-    var file = this.demos[ID];
+    var file = this.#demos[ID];
     if (!file && this.fileUploaded && this.fileUploaded.id === ID)
       file = this.fileUploaded;
-    else if (!file && this.fileUploaded && this.attachedFiles)
-      file = this.attachedFiles[ID];
+    else if (!file && this.fileUploaded)
+      file = this.fileUploaded._getAttachedByID(ID);
     return file;
   }
 
@@ -35,24 +31,22 @@ export class FilesStructure {
     this.fileUploaded = newDataStructure;
   }
 
-  removeByID(ID) {
+  removeFileByID(ID) {
     var file = this.getFileByID(ID);
     if (file) {
       if (file.isAttached) {
-        console.log(this.attachedFiles[ID]);
-        delete this.attachedFiles[ID];
+        this.fileUploaded._removeAttachedFile(ID);
       } else {
-        this.attachedFiles = {};
         this.fileUploaded = undefined;
       }
     }
   }
   addAttachedFile(newDataStructure) {
-    this.attachedFiles[newDataStructure.id] = newDataStructure;
+    this.fileUploaded._addAttachedFile(newDataStructure);
   }
 
   clone() {
-    return new FilesStructure(this.fileUploaded, this.attachedFiles);
+    return new FilesStructure(this.fileUploaded);
   }
 }
 
@@ -72,11 +66,8 @@ export class SingleFileDataStructure {
       // ["ERROR", "Demasiados objetos"],
       // ["WARN", "Demasiados objetos"],
     ];
-
-    if (isAttached) this.isAttached = true;
-    else {
-      this.isAttached = false;
-    }
+    this.attachedFiles = {};
+    this.isAttached = isAttached;
     if (!isDemoFile) {
       this.pathFile = URL.createObjectURL(file);
       this.originalPathFile = this.pathFile;
@@ -85,9 +76,47 @@ export class SingleFileDataStructure {
       this.originalPathFile = prePath + fileName + extension;
     }
   }
+
+  _getAttachedByID(ID) {
+    var file = this.attachedFiles[ID];
+    return file;
+  }
+
+  _removeAttachedFile(ID) {
+    delete this.attachedFiles[ID];
+  }
+
+  _addAttachedFile(newDataStructure) {
+    this.attachedFiles[newDataStructure.id] = newDataStructure;
+  }
+
+  _getAttachedIDs() {
+    return Object.keys(this.attachedFiles);
+  }
+
+  getBlobs() {
+    let fileNames = [];
+    let promises = [];
+    // Main file
+    promises.push(this._getBlobByURL(this.pathFile));
+    fileNames.push(this.fileName);
+    // Attacheds files
+    Object.keys(this.attachedFiles).forEach((ID) => {
+      let f = this._getAttachedByID(ID);
+      promises.push(this._getBlobByURL(f.pathFile));
+      fileNames.push(f.fileName);
+    });
+    let masterPromise = Promise.allSettled(promises);
+    return { fileNames, masterPromise };
+  }
+
+  async _getBlobByURL(URL) {
+    const data = await fetch(URL);
+    return await data.blob();
+  }
 }
-var DEMOS = {};
-// Inicializa los DEMOS
+
+const DEMOS = {};
 if (Constants.DEMOS_MODELS) {
   Constants.DEMOS_MODELS.forEach((value) => {
     var newFile = new SingleFileDataStructure(

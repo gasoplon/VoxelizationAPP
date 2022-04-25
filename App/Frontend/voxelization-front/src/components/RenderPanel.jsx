@@ -34,61 +34,56 @@ export function RenderPanel() {
     // En caso de no haber seleccionado un objeto
     if (selectedFile === null) return;
 
-    // Petición de obtención del archivo a partir de la URL
-    var request = new XMLHttpRequest();
-    request.open("GET", selectedFile.originalPathFile, true);
-    request.responseType = "blob";
-    request.onload = function () {
-      var reader = new FileReader();
-      reader.readAsDataURL(request.response);
+    // GET files a partir de las URLs de los Blobs
+    let { fileNames, masterPromise } = selectedFile.getBlobs();
+    masterPromise.then((blobs) => {
+      // console.log(fileNames);
+      // console.log(blobs);
+      // Form Data Creation
+      const formData = new FormData();
 
-      // Cuando se haya leído
-      reader.onload = function (e) {
-        // Create an object of formData
-        const formData = new FormData();
+      // Main file
+      formData.append("fileUploaded", blobs[0].value, fileNames[0]);
 
-        // Update the formData object with file
-        formData.append(
-          "fileUploaded",
-          request.response,
-          selectedFile.fileName
-        );
+      // Update the formData object with resolution
+      formData.append("resolutionVoxel", resolutionVoxel);
 
-        // Update the formData object with resolution
-        formData.append("resolutionVoxel", resolutionVoxel);
+      // Update the formData object with useRemoveDisconnected
+      formData.append("useRemoveDisconnected", useRemoveDisconnected);
 
-        // Update the formData object with resolution
-        formData.append("useRemoveDisconnected", useRemoveDisconnected);
+      if (formData.length > 1) {
+        blobs.shift();
+        let cont = 1;
+        for (let file of blobs) {
+          formData.append("attachedFiles", file, fileNames[cont]);
+          cont++;
+        }
+      }
+      console.log(formData);
 
-        // Details of the uploaded file
-        // console.log(e.target.result);
-
-        // Request made to the backend api
-        // Send formData object
-        axios
-          .post(Constants.API_UPLOAD_FILE_URL, formData)
-          .then((resp) => {
-            var myblob = new Blob([resp.data], {
-              type: "text/plain",
-            });
-            var state_copy = { ...selectedFile };
-            state_copy.pathFile = URL.createObjectURL(myblob);
-            setSelectedFile(state_copy);
-          })
-          .catch((err) => {
-            // const error = {
-            //   status: err.response["status"],
-            //   message: err.response["data"]["message"],
-            // };
-            // console.error(error);
-            console.error("ERR:" + err);
-            // console.error(err.message);
-            // console.error(err.request);
-            // setErrors(error["message"]);
+      // Send formData object
+      axios
+        .post(Constants.API_UPLOAD_FILE_URL, formData)
+        .then((resp) => {
+          var myblob = new Blob([resp.data], {
+            type: "text/plain",
           });
-      };
-    };
-    request.send();
+          var state_copy = { ...selectedFile };
+          state_copy.pathFile = URL.createObjectURL(myblob);
+          setSelectedFile(state_copy);
+        })
+        .catch((err) => {
+          // const error = {
+          //   status: err.response["status"],
+          //   message: err.response["data"]["message"],
+          // };
+          // console.error(error);
+          console.error("ERR:" + err);
+          // console.error(err.message);
+          // console.error(err.request);
+          // setErrors(error["message"]);
+        });
+    });
   };
   // ------------------- FUNCIONES AUXILIARES ---------------------------------------
   const handleResetOptions = () => {

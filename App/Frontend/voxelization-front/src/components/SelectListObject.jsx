@@ -27,13 +27,13 @@ export default function SelectedListItem(props) {
   const [selectedIDFile, setSelectedIDFile] = React.useState();
   useEffect(() => {
     // Inicializar estado
-    var demosIDs = filesUploadedItems.demosFilesIDs();
-    if (demosIDs) {
+    var demosIDs = filesUploadedItems.demosFilesIDs;
+    if (demosIDs && !filesUploadedItems.fileUploaded) {
       var key = demosIDs[0];
       setSelectedIDFile(key);
       props.handleSelectedFileChange(filesUploadedItems.getFileByID(key));
     }
-  }, []);
+  }, [filesUploadedItems]);
 
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
@@ -43,32 +43,23 @@ export default function SelectedListItem(props) {
   };
   const handleDelete = (event, id) => {
     var copy = filesUploadedItems.clone();
-    copy.removeByID(id);
+    copy.removeFileByID(id);
     document.getElementById("contained-button-file").value = null;
     document.getElementById("contained-button-attached").value = null;
     setFilesUploadedItems(copy);
   };
-  const handleFileUploaded = (event) => {
+  const handleFileUploaded = (event, isAttachedFile) => {
     var newFile = new SingleFileDataStructure(
-      event.target.files[0].name.split(".")[0],
-      Constants.DEMOS_EXTENSION,
+      !isAttachedFile
+        ? event.target.files[0].name.split(".")[0]
+        : event.target.files[0].name,
+      !isAttachedFile ? Constants.DEMOS_EXTENSION : "",
       "",
       false,
       event.target.files[0],
-      false
+      isAttachedFile
     );
-    addFileStructureToState(newFile);
-  };
-  const handleFileAttachedUploaded = (event) => {
-    var newStructure = new SingleFileDataStructure(
-      event.target.files[0].name.split(".")[0],
-      Constants.DEMOS_EXTENSION,
-      "",
-      false,
-      event.target.files[0],
-      true
-    );
-    addFileStructureToState(newStructure, true);
+    addFileStructureToState(newFile, isAttachedFile);
   };
 
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
@@ -77,12 +68,11 @@ export default function SelectedListItem(props) {
     if (isAttachedFile) copy.addAttachedFile(newDataStructure);
     else copy.addUploadedFile(newDataStructure);
     setFilesUploadedItems(copy);
-    setSelectedIDFile(newDataStructure.id);
   }
 
   // ------------------- ITEMS -----------------------------------------
   const DemosListItems = () => {
-    var filesIDs = filesUploadedItems.demosFilesIDs();
+    var filesIDs = filesUploadedItems.demosFilesIDs;
     var items = [];
     if (filesIDs) {
       filesIDs.forEach((demoID) => {
@@ -131,12 +121,13 @@ export default function SelectedListItem(props) {
 
   const UploadedAttachedItems = () => {
     var items = [];
-    if (filesUploadedItems.attachedFiles) {
-      Object.keys(filesUploadedItems.attachedFiles).forEach((key) => {
+    var attachedFiles = filesUploadedItems.fileUploaded.attachedFiles;
+    if (filesUploadedItems.fileUploaded && attachedFiles) {
+      Object.keys(attachedFiles).forEach((key) => {
         items.push(
           <ListItem key={key}>
             <ListItemText
-              primary={filesUploadedItems.attachedFiles[key].fileName}
+              primary={filesUploadedItems.getFileByID(key).fileName}
             />
 
             <Tooltip title="Delete">
@@ -192,7 +183,7 @@ export default function SelectedListItem(props) {
         type="file"
         hidden
         id="contained-button-file"
-        onChange={handleFileUploaded}
+        onChange={(event) => handleFileUploaded(event, false)}
       />
       <label htmlFor="contained-button-file">
         {!filesUploadedItems.fileUploaded && (
@@ -213,7 +204,7 @@ export default function SelectedListItem(props) {
         type="file"
         hidden
         id="contained-button-attached"
-        onChange={handleFileAttachedUploaded}
+        onChange={(event) => handleFileUploaded(event, true)}
       />
       <label htmlFor="contained-button-attached">
         {filesUploadedItems.fileUploaded && (
