@@ -1,11 +1,11 @@
 {
     "favorites.resources": [
         {
-            "filePath": "App\\Frontend\\voxelization-front\\node_modules\\three",
+            "filePath": "App\\Backend\\src",
             "group": "Default"
         },
         {
-            "filePath": "App\\Frontend\\voxelization-front\\node_modules\\@mui",
+            "filePath": "App\\Frontend\\voxelization-front\\src",
             "group": "Default"
         }
     ]

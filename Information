@@ -10,6 +10,7 @@ Otra herramienta interesante es React 360, que es una biblioteca utilizada para 
 PC GRANDE
 cd E:\Documentos\Git Repositories\VoxelizationAPP\App\Backend\src
 "..\..\..\Python Enviroments\windows-env\Scripts\activate"
+set FLASK_ENV=development
 
 E:\Documentos\Git Repositories\VoxelizationAPP\App\Frontend\voxelization-front\src
 
