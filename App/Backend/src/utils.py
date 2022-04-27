@@ -1,38 +1,48 @@
 import logging
 import os
+
 import ERROR_CODES
 from Exceptions import *
 from config import config
 from re import *
 
 # Constantes
-FILE_NAME = 'fileUploaded'
-ALLOWED_EXTENSIONS = {'obj'}
 BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {}'
 
 # Logger
 logger = logging.getLogger(__name__)
 
 
-def allowed_file_extension(filename):
+def allowed_file_extension(filename, extensions):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower(
+           ) in extensions
 
 
 def checkFileUploaded(files):
-    # Get file
-    file = files[FILE_NAME]
-    logger.debug(file)
+    # Get main file
+    mainFile = files[config['API_PARAM_MAIN_FILE']]
+    logger.debug(mainFile)
 
-    if not allowed_file_extension(file.filename):
+    if not allowed_file_extension(mainFile.filename, config['ALLOWED_EXTENSIONS_MODEL_FILE']):
         raise InvalidAPIParameterException(
             ERROR_CODES.NOT_ALLOWED_FILE_EXTENSION_ERROR_012)
 
-    return file
+    # Get attached files
+    attachedFiles = []
+    if(config['API_PARAM_ATTACHED_FILES'] in files):
+        attachedFiles = files[config['API_PARAM_ATTACHED_FILES']]
+
+        if attachedFiles:
+            logger.debug(attachedFiles)
+            if not allowed_file_extension(attachedFiles.filename, config['ALLOWED_EXTENSIONS_ATTACHED_FILES']):
+                raise InvalidAPIParameterException(
+                    ERROR_CODES.NOT_ALLOWED_FILE_EXTENSION_ERROR_012)
+
+    return mainFile, attachedFiles
+
 
 # METODOS DE VOXELIZACION
-
-
 def voxelization(file_name, resolution=4, removeDisconnectedElements=False):
     # os.system(BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name))
     formatted_command = BLENDER_COMMAND.format(

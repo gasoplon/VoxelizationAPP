@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level='DEBUG')
 
 # Configuración
-enviroment = config['development']
+enviroment = config['DEVELOPMENT_CONFIG']
 app = create_app(enviroment)
 # TODO: No funciona session cookie
 # TODO: Comprobar CSRF
@@ -72,22 +72,22 @@ def receive_file():
     # ==============================================================
     # Resolucion para la voxelización
     try:
-        resolution = request.form['resolutionVoxel']
+        resolution = request.form[config['API_PARAM_RESOLUTION']]
     except KeyError as e:
         resolution = None
     # Usar eliminar elementos inconexos
     try:
-        removeDisconnectedElements = request.form['useRemoveDisconnected']
+        removeDisconnectedElements = request.form[config['API_PARAM_USE_REMOVE_DISCONNECTED']]
     except KeyError as e:
         removeDisconnectedElements = None
 
     missingArguments = []
     if(not resolution):
-        missingArguments.append("resolution")
+        missingArguments.append(config['API_PARAM_RESOLUTION'])
     if(not removeDisconnectedElements):
-        missingArguments.append("remove_disconnected_elements")
-    if(not request.files or len(request.files) != 1):
-        missingArguments.append("file")
+        missingArguments.append(config['API_PARAM_USE_REMOVE_DISCONNECTED'])
+    if(not request.files or not config['API_PARAM_MAIN_FILE'] in request.files):
+        missingArguments.append(config['API_PARAM_MAIN_FILE'])
 
     if(len(missingArguments) > 0):
         raise InvalidAPIParameterException(
@@ -118,7 +118,7 @@ def receive_file():
     if file:
         new_UUID = uuid.uuid1()
         file_name = str(new_UUID) + '.obj'
-        file.save(os.path.join(uploads_dir, file_name))
+        file[0].save(os.path.join(uploads_dir, file_name))
 
         # Voxelization Algorithm
         voxelization(file_name, resolution, removeDisconnectedElements)

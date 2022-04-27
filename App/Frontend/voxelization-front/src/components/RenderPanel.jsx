@@ -43,19 +43,19 @@ export function RenderPanel() {
       const formData = new FormData();
 
       // Main file
-      formData.append("fileUploaded", blobs[0].value, fileNames[0]);
+      formData.append("modelFile", blobs[0].value, fileNames[0]);
 
       // Update the formData object with resolution
       formData.append("resolutionVoxel", resolutionVoxel);
 
       // Update the formData object with useRemoveDisconnected
       formData.append("useRemoveDisconnected", useRemoveDisconnected);
-
-      if (formData.length > 1) {
+      console.log(blobs);
+      if (blobs.length > 1) {
         blobs.shift();
         let cont = 1;
         for (let file of blobs) {
-          formData.append("attachedFiles", file, fileNames[cont]);
+          formData.append("attachedFiles", file.value, fileNames[cont]);
           cont++;
         }
       }
