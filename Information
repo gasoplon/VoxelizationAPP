@@ -12,8 +12,12 @@ cd E:\Documentos\Git Repositories\VoxelizationAPP\App\Backend\src
 "..\..\..\Python Enviroments\windows-env\Scripts\activate"
 set FLASK_ENV=development
 
-E:\Documentos\Git Repositories\VoxelizationAPP\App\Frontend\voxelization-front\src
+cd E:\Documentos\Git Repositories\VoxelizationAPP\App\Frontend\voxelization-front\src
 
 PORTATIL
 C:\Users\david\Documents\Git Repositories\VoxelizationAPP\App\Backend\src
 C:\Users\david\Documents\Git Repositories\VoxelizationAPP\App\Frontend\voxelization-front\src
+
+METODOS DE TEXTURING
+-Shrinkwrap Modifier
+-Data transfer modifier

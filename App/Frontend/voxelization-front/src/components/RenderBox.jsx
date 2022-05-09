@@ -21,7 +21,7 @@ export function RenderBox(props) {
     window.innerWidth / window.innerHeight
   );
   // Render
-  var renderer = new THREE.WebGLRenderer();
+  var renderer = new THREE.WebGLRenderer({ antialias: true });
 
   // Controles
   const controls = new OrbitControls(camera, renderer.domElement);
