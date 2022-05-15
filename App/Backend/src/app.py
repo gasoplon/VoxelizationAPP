@@ -95,15 +95,15 @@ def receive_file():
 
     try:
         resolution = int(resolution)
-    except ValueError as exc:
+    except ValueError:
         raise InvalidAPIParameterException(
             ERROR_CODES.INVALID_RESOLUTION_TYPE_ERROR_011)
 
-    if(resolution > 24 or resolution < 1):
+    if(resolution not in config['RESOLUTION_RANGE_ALLOWED']):
         raise InvalidAPIParameterException(
             ERROR_CODES.INVALID_RESOLUTION_RANGE_ERROR_010)
 
-    if(removeDisconnectedElements not in ['true', 'false']):
+    if(removeDisconnectedElements not in config['USE_REMOVE_DISCONNECTED_ELEMENTS_ALLOWED']):
         raise InvalidAPIParameterException(
             ERROR_CODES.INVALID_REMOVE_DISCONNECTED_ELEMENTS_TYPE_ERROR_014)
 
@@ -113,12 +113,11 @@ def receive_file():
     file = checkFileUploaded(request.files)
     # ==============================================================
     # Guardar archivo y voxelizar figura
-    new_UUID = None
-    file_name = None
     if file:
+        ext = file.filename.split('.')[1]
         new_UUID = uuid.uuid1()
-        file_name = str(new_UUID) + '.obj'
-        file[0].save(os.path.join(uploads_dir, file_name))
+        file_name = str(new_UUID) + '.' + ext
+        file.save(os.path.join(uploads_dir, file_name))
 
         # Voxelization Algorithm
         voxelization(file_name, resolution, removeDisconnectedElements)
