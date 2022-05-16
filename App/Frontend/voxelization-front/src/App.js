@@ -4,7 +4,6 @@ import { RenderPanel } from "./components/RenderPanel";
 import React from "react";
 import NavigationBar from "./components/NavigationBar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Footer } from "./components/Footer";
 
 function App() {
   return (

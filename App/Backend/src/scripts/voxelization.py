@@ -47,22 +47,5 @@ modifier.use_remove_disconnected = bool(removeDisconnectedElements)
 
 # Save
 bpy.ops.export_scene.gltf(
-    filepath=obj_out, export_format='GLB', use_selection=True)
+    filepath=obj_out, export_format='GLB', use_selection=True, export_materials='EXPORT', export_apply=True)
 ##################################################################################################################
-
-
-# #Deselect all
-# bpy.ops.object.select_all(action='DESELECT')
-
-# #Mesh objects
-# MSH_OBJS = [m for m in bpy.context.scene.objects if m.type == 'MESH']
-
-# for OBJS in MSH_OBJS:
-#     #Select all mesh objects
-#     OBJS.select_set(state=True)
-
-#     #Makes one active
-#     bpy.context.view_layer.objects.active = OBJS
-
-# #Joins objects
-# bpy.ops.object.join()

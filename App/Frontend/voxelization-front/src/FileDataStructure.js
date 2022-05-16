@@ -121,7 +121,7 @@ if (Constants.DEMOS_MODELS) {
   Constants.DEMOS_MODELS.forEach((value) => {
     var newFile = new SingleFileDataStructure(
       value,
-      ".obj",
+      Constants.DEMOS_EXTENSION,
       Constants.ROOT_MODELS_DEMOS_PATH,
       true
     );
