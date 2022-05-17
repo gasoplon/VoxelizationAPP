@@ -24,6 +24,7 @@ import {
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import PropTypes from "prop-types";
+// import { createBackground } from "three-vignette-background";
 
 Cache.enabled = true;
 
@@ -40,7 +41,6 @@ export function RenderBox(props) {
     1000
   );
   const controls = new OrbitControls(camera, renderer.domElement); // Controles
-
   // Configuracion
   const configuracion = {
     sceneBackgroundColor: 0xbfe3dd,
@@ -48,7 +48,14 @@ export function RenderBox(props) {
     colorAmbiente: 0xffffff,
     intensidadDirecta: 0.8 * Math.PI,
     colorDirecto: 0xffffff,
+    colorVineta1: "#ffffff",
+    colorVineta2: "#353535",
   };
+  // const vineta = createBackground({
+  //   aspect: this.defaultCamera.aspect,
+  //   grainScale: 0.001,
+  //   colors: [configuracion.colorVineta1, configuracion.colorVineta2],
+  // });
 
   // Lights
   const luzGlobal = new HemisphereLight();
@@ -68,7 +75,7 @@ export function RenderBox(props) {
   camera.add(luz2);
   luz2.position.set(0.5, 0, 0.87);
   scene.background = new Color(configuracion.sceneBackgroundColor);
-  renderer.physicallyCorrectLights = true;
+  // renderer.physicallyCorrectLights = true;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   controls.screenSpacePanning = true;

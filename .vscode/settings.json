@@ -1,19 +1,7 @@
 {
     "favorites.resources": [
         {
-            "filePath": "App\\Backend\\src",
-            "group": "Default"
-        },
-        {
-            "filePath": "App\\Frontend\\voxelization-front\\src",
-            "group": "Default"
-        },
-        {
             "filePath": "App\\Frontend\\voxelization-front\\node_modules\\cdbreact",
-            "group": "Default"
-        },
-        {
-            "filePath": "Pruebas\\Pruebas de Modelos",
             "group": "Default"
         }
     ]
