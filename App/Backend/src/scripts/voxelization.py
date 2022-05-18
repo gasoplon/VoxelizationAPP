@@ -12,7 +12,12 @@ OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 # Conf
 ANGLE_LIMIT = 1.15191731  # 66º
 ITERATIONS_SUBDIVIDE = 7  # Nº de iteraciones del subdivide
-APPLY_MODIFIERS = True
+APPLY_MODIFIERS = {
+    "generateUVs": False,
+    "subdivide": True,
+    "shrinkWrap": False,
+    "remesh": False
+}
 # /////////////////  FUNCS AUXS.  ////////////////////////////
 
 
@@ -30,7 +35,13 @@ def copy_object(source_object, new_name):
 
 
 def select_one_object(object_selected):
-    bpy.context.scene.objects.active = object_selected
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = object_selected
+    object_selected.select_set(True)
+
+
+def set_active_object(object):
+    bpy.context.selected_objects = object
 
 
 # /////////////////////////////////////////////////////////////
@@ -59,45 +70,66 @@ if(len(obj_names) != 4 or obj_name == None):
 
 # Copias para ser modificadas
 original_object = bpy.data.objects[obj_name]
-remeshed_object = copy_object(original_object, "Remeshed_Object")
 shrinkwrapped_object = copy_object(original_object, "Shrinkwrapped_Object")
+remeshed_object = copy_object(original_object, "Remeshed_Object")
 
-# Remesh(Voxelization)
-modifierRemesh = remeshed_object.modifiers.new(type='REMESH', name="Remesh")
-modifierRemesh.mode = "BLOCKS"
-modifierRemesh.octree_depth = int(resolution)
-modifierRemesh.use_remove_disconnected = bool(removeDisconnectedElements)
-
-# Generate UV (Smart UV Project) from meshed object
-bpy.ops.object.editmode_toggle()
-if(APPLY_MODIFIERS):
-    bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
-    # Add extra vertices
+# Add extra vertices
+if(APPLY_MODIFIERS["subdivide"]):
+    print(bpy.context.active_object)
+    select_one_object(shrinkwrapped_object)
+    print(bpy.context.active_object)
     bpy.ops.mesh.subdivide(number_cuts=ITERATIONS_SUBDIVIDE)
 
+# Remesh(Voxelization)
+if(APPLY_MODIFIERS["remesh"]):
+    modifierRemesh = remeshed_object.modifiers.new(
+        type='REMESH', name="Remesh")
+    modifierRemesh.mode = "BLOCKS"
+    modifierRemesh.octree_depth = int(resolution)
+    modifierRemesh.use_remove_disconnected = bool(removeDisconnectedElements)
+
+
+# Generate UV (Smart UV Project) from meshed object
+if(APPLY_MODIFIERS["generateUVs"]):
+    bpy.ops.object.editmode_toggle()
+    select_one_object(remeshed_object)
+    bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
     select_one_object(shrinkwrapped_object)
     bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
 
 # Shrinkwrap
-modifierRemesh = shrinkwrapped_object.modifiers.new(
-    type='SHRINKWRAP', name="Shrinkwrap")
-modifierRemesh.target = remeshed_object
-modifierRemesh.wrap_method = 'NEAREST_SURFACEPOINT'
-bpy.ops.object.editmode_toggle()
-if(APPLY_MODIFIERS):
+if(APPLY_MODIFIERS["shrinkWrap"]):
+    modifierShrinkwrap = shrinkwrapped_object.modifiers.new(
+        type='SHRINKWRAP', name="Shrinkwrap")
+    modifierShrinkwrap.target = remeshed_object
+    modifierShrinkwrap.wrap_method = 'NEAREST_SURFACEPOINT'
+    bpy.ops.object.editmode_toggle()
     bpy.ops.object.modifier_apply(
-        modifier=modifierRemesh.name
+        modifier=modifierShrinkwrap.name
     )
 
 # Bake
-bpy.context.space_data.context = 'RENDER'
-bpy.context.scene.render.engine = 'CYCLES'
-bpy.context.scene.cycles.device = 'GPU'
+bpy.context.scene.render.engine = "CYCLES"
+bpy.context.preferences.addons[
+    "cycles"
+].preferences.compute_device_type = "CUDA"
+bpy.context.scene.cycles.device = "GPU"
+bpy.context.preferences.addons["cycles"].preferences.get_devices()
+# print(bpy.context.preferences.addons["cycles"].preferences.compute_device_type)
+# for d in bpy.context.preferences.addons["cycles"].preferences.devices:
+#     d["use"] = 1  # Using all devices, include GPU and CPU
+#     print(d["name"], d["use"])
+
+# bpy.context.space_data.context = 'RENDER'
+# bpy.context.scene.render.engine = 'CYCLES'
+# bpy.context.scene.cycles.device = 'GPU'
 bpy.context.scene.cycles.bake_type = 'DIFFUSE'
 bpy.context.scene.render.bake.use_pass_direct = False
 bpy.context.scene.render.bake.use_pass_indirect = False
 bpy.context.scene.render.bake.use_selected_to_active = True
 bpy.context.scene.render.bake.margin = 0
+bpy.ops.outliner.item_activate(deselect_all=True)
+bpy.ops.outliner.item_activate(extend_range=True, deselect_all=True)
 
 
 # Export objects
