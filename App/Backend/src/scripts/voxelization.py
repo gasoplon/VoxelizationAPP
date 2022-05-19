@@ -15,7 +15,7 @@ ITERATIONS_SUBDIVIDE = 7  # Nº de iteraciones del subdivide
 APPLY_MODIFIERS = {
     "subdivide": False,
     "remesh": True,
-    "generateUVs": True,
+    "generateUVs": False,
     "shrinkWrap": False,
     "bake": False
 }
@@ -57,6 +57,9 @@ obj_in = argv[0]
 obj_out = argv[1]
 resolution = argv[2]
 removeDisconnectedElements = argv[3]
+file_name = argv[4]
+baked_directory = argv[5]
+baked_file_extension = argv[6]
 
 # Importar escena
 bpy.ops.import_scene.gltf(filepath=obj_in)
@@ -100,8 +103,6 @@ remove_object(original_object)
 
 deselectAllObjects()
 
-# print(list(bpy.data.objects))
-
 # BMeshes
 bmesh_shrinkwrapped_object = bmesh.new()
 
@@ -137,7 +138,6 @@ if(APPLY_MODIFIERS["generateUVs"]):
     for obj in all_objects:
         if (obj.type == 'MESH'):
             select_one_object(obj)
-            print(obj.name)
             lm = obj.data.uv_layers.get("LightMap")
             if not lm:
                 lm = obj.data.uv_layers.new(name="LightMap")
@@ -164,7 +164,7 @@ if(APPLY_MODIFIERS["shrinkWrap"]):
 if(APPLY_MODIFIERS["bake"]):
 
     image_name = remeshed_object.name + '_BakedTexture'
-    texture_image = bpy.data.images.new(image_name, 1024, 1024)
+    texture_image = bpy.data.images.new(image_name, 2048, 2048)
 
     # Delete materials from remeshed object
     remeshed_object.data.materials.clear()
@@ -189,14 +189,22 @@ if(APPLY_MODIFIERS["bake"]):
     select_one_object(remeshed_object)
 
     # Bake
-    # bpy.ops.object.bake(type="DIFFUSE", pass_filter={
-    #     "COLOR"}, use_selected_to_active=True, margin=0)
+    bpy.ops.object.bake(type="DIFFUSE", pass_filter={
+        "COLOR"}, use_selected_to_active=True, margin=0)
 
     # Save texture image
-    texture_image.save_render(filepath='E:\\Documentos\\Temporal\\baked.png')
+    texture_image.save_render(
+        filepath='.\\' + baked_directory + "\\" + file_name + baked_file_extension)
 
-# Select all objets to export
-selectAllObjects()
+# Select object to export
+# deselectAllObjects()
+select_one_object(remeshed_object)
+# Remove triangles UVs
+# bpy.ops.object.editmode_toggle()
+# bpy.ops.mesh.select_all(action='SELECT')
+# print(bpy.context.object)
+# print(bpy.ops.mesh.tris_convert_to_quads())
+# bpy.ops.object.editmode_toggle()
 
 # Export objects
 bpy.ops.export_scene.gltf(

@@ -1,13 +1,13 @@
 import logging
 import os
+# from mosaic_generation import *
 
 import ERROR_CODES
 from Exceptions import *
 from config import config
 from re import *
-
 # Constantes
-BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {}'
+BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -36,9 +36,9 @@ def checkFileUploaded(files):
 
 
 # METODOS DE VOXELIZACION
-def voxelization(file_name, resolution, removeDisconnectedElements):
+def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
     formatted_command = BLENDER_COMMAND.format(
-        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements)
+        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements, UUID, config['DIRECTORY_FILES_BAKED_TEXTURES'], config['BAKED_FILES_EXTENSION'])
     output = os.popen(formatted_command)
     print(output.read())
     errors = findall("ERR_CODE: \d", output.read())
@@ -47,4 +47,10 @@ def voxelization(file_name, resolution, removeDisconnectedElements):
         if('1' in e):
             raise InvalidAPIParameterException(
                 ERROR_CODES.NO_SINGLE_ELEMENT_IN_FILE_ERROR_030)
+    return None
+
+
+def MinecraftTexturing(UUID):
+    # mosaic('.\\' + config['DIRECTORY_FILES_BAKED_TEXTURES'] + "\\" + UUID +
+    #        config['BAKED_FILES_EXTENSION'], config["DIRECTORY_MINECRAFT_TEXTURES"])
     return None

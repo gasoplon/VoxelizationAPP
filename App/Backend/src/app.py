@@ -41,6 +41,8 @@ uploads_dir = os.path.join(config['DIRECTORY_UPLOADED_FILE'])
 os.makedirs(uploads_dir, exist_ok=True)
 processed_dir = os.path.join(config['DIRECTORY_FILES_PROCESSED'])
 os.makedirs(processed_dir, exist_ok=True)
+processed_dir = os.path.join(config['DIRECTORY_FILES_BAKED_TEXTURES'])
+os.makedirs(processed_dir, exist_ok=True)
 
 # Manejo de errores
 # TODO: Cambiar codigo de vuelta
@@ -119,10 +121,12 @@ def receive_file():
         file_name = str(new_UUID) + '.' + ext
         file.save(os.path.join(uploads_dir, file_name))
 
-        # Voxelization Algorithm
-        voxelization(file_name, resolution, removeDisconnectedElements)
+        # Voxelization with textures Algorithm
+        Voxelization(new_UUID, file_name, resolution,
+                     removeDisconnectedElements)
 
-    # TODO: Texturing.......
+        # TODO: Mosaico
+        MinecraftTexturing(new_UUID)
 
     # TODO: Minecraft Command.......
 
