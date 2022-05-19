@@ -13,7 +13,7 @@ OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 ANGLE_LIMIT = 1.15191731  # 66º
 ITERATIONS_SUBDIVIDE = 7  # Nº de iteraciones del subdivide
 APPLY_MODIFIERS = {
-    "subdivide": True,
+    "subdivide": False,
     "remesh": True,
     "generateUVs": True,
     "shrinkWrap": False,
@@ -27,45 +27,26 @@ def setActive(obj):
 
 
 def selectAllObjects():
-    setActive(None)
-    for o in all_objects:
-        o.select_set(True)
+    bpy.ops.object.select_all(action='SELECT')
+    # setActive(None)
+    # for o in all_objects:
+    #     o.select_set(True)
 
 
 def deselectAllObjects():
-    setActive(None)
-    for o in all_objects:
-        o.select_set(False)
+    bpy.ops.object.select_all(action='DESELECT')
+    # setActive(None)
+    # for o in all_objects:
+    #     o.select_set(False)
 
 
 def select_one_object(object_selected):
-    deselectAllObjects()
     setActive(object_selected)
     object_selected.select_set(True)
 
 
 def remove_object(object):
     bpy.data.objects.remove(object)
-
-
-def copy_object(source_object, new_name):
-    new_obj = source_object.copy()
-    new_obj.name = new_name
-    new_obj.data = source_object.data.copy()
-    new_obj.animation_data_clear()
-    remove_UVs(new_obj)
-    bpy.context.collection.objects.link(new_obj)
-    return new_obj
-
-
-def remove_UVs(object):
-    bmesh_from_object = bmesh.new()
-    bmesh_from_object.from_mesh(object.data)
-    UVLayers = bmesh_from_object.loops.layers.uv
-    for UVLayer in bmesh_from_object.loops.layers.uv.items():
-        UVLayers.remove(UVLayer[1])
-    bmesh_from_object.to_mesh(object.data)
-    object.data.update()
 
 
 # /////////////////////////////////////////////////////////////
@@ -99,15 +80,27 @@ for area in bpy.context.screen.areas:
         space_data = area.spaces.active
         break
 
-# Copias para ser modificadas
-# Objetos
+# Copia original seleccionada para crear duplicada
 original_object = bpy.data.objects[obj_name]
-shrinkwrapped_object = copy_object(original_object, "Shrinkwrapped_Object")
-remeshed_object = copy_object(original_object, "Remeshed_Object")
+select_one_object(original_object)
+
+# Duplicado
+bpy.ops.object.duplicate()
+bpy.ops.object.duplicate()
+
+# Get new objects
+shrinkwrapped_object = bpy.data.objects[1]
+remeshed_object = bpy.data.objects[2]
+shrinkwrapped_object.name = "Shrinkwrapped_Object"
+remeshed_object.name = "Remeshed_Object"
 all_objects = [shrinkwrapped_object, remeshed_object]
 
 # Remove useless objects
 remove_object(original_object)
+
+deselectAllObjects()
+
+# print(list(bpy.data.objects))
 
 # BMeshes
 bmesh_shrinkwrapped_object = bmesh.new()
@@ -139,14 +132,22 @@ if(APPLY_MODIFIERS["remesh"]):
 
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):
-    selectAllObjects()
-    # setActive(remeshed_object)
-    bpy.ops.object.editmode_toggle()
-    # print(bpy.context.selected_objects)
-    # print(bpy.context.active_object)
-    bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
-    bpy.ops.object.editmode_toggle()
     deselectAllObjects()
+
+    for obj in all_objects:
+        if (obj.type == 'MESH'):
+            select_one_object(obj)
+            print(obj.name)
+            lm = obj.data.uv_layers.get("LightMap")
+            if not lm:
+                lm = obj.data.uv_layers.new(name="LightMap")
+            lm.active = True
+            bpy.ops.mesh.uv_texture_remove()
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
+            bpy.ops.object.editmode_toggle()
+            obj.select_set(False)
 
 # Shrinkwrap
 if(APPLY_MODIFIERS["shrinkWrap"]):
