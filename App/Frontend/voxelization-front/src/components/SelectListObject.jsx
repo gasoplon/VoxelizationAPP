@@ -45,28 +45,18 @@ export default function SelectedListItem(props) {
     var copy = filesUploadedItems.clone();
     copy.removeFileByID(id);
     document.getElementById("contained-button-file").value = null;
-    document.getElementById("contained-button-attached").value = null;
     setFilesUploadedItems(copy);
   };
-  const handleFileUploaded = (event, isAttachedFile) => {
-    var newFile = new SingleFileDataStructure(
-      !isAttachedFile
-        ? event.target.files[0].name.split(".")[0]
-        : event.target.files[0].name,
-      !isAttachedFile ? Constants.DEMOS_EXTENSION : "",
-      "",
-      false,
-      event.target.files[0],
-      isAttachedFile
-    );
-    addFileStructureToState(newFile, isAttachedFile);
+  const handleFileUploaded = (event) => {
+    var file_name = event.target.files[0].name;
+    var newFile = new SingleFileDataStructure(file_name, event.target.files[0]);
+    addFileStructureToState(newFile);
   };
 
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
-  function addFileStructureToState(newDataStructure, isAttachedFile = false) {
+  function addFileStructureToState(newDataStructure) {
     var copy = filesUploadedItems.clone();
-    if (isAttachedFile) copy.addAttachedFile(newDataStructure);
-    else copy.addUploadedFile(newDataStructure);
+    copy.addUploadedFile(newDataStructure);
     setFilesUploadedItems(copy);
   }
 
@@ -119,33 +109,6 @@ export default function SelectedListItem(props) {
     return item;
   };
 
-  const UploadedAttachedItems = () => {
-    var items = [];
-    var attachedFiles = filesUploadedItems.fileUploaded.attachedFiles;
-    if (filesUploadedItems.fileUploaded && attachedFiles) {
-      Object.keys(attachedFiles).forEach((key) => {
-        items.push(
-          <ListItem key={key}>
-            <ListItemText
-              primary={filesUploadedItems.getFileByID(key).fileName}
-            />
-
-            <Tooltip title="Delete">
-              <IconButton
-                edge="end"
-                aria-label="delete"
-                onClick={(event) => handleDelete(event, key)}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          </ListItem>
-        );
-      });
-    }
-    return items;
-  };
-
   // ------------------- RETURN -----------------------------------------
   return (
     <Box
@@ -166,18 +129,6 @@ export default function SelectedListItem(props) {
           Archivos
         </Typography>
         {UploadedFileItem()}
-        {filesUploadedItems.fileUploaded && (
-          <div>
-            <Typography
-              sx={{ mt: 1, mb: 1 }}
-              variant="subtitle2"
-              component="div"
-            >
-              Adjuntos
-            </Typography>
-            {UploadedAttachedItems()}
-          </div>
-        )}
       </List>
       <input
         type="file"
@@ -200,28 +151,6 @@ export default function SelectedListItem(props) {
           </Tooltip>
         )}
       </label>
-      <input
-        type="file"
-        hidden
-        id="contained-button-attached"
-        onChange={(event) => handleFileUploaded(event, true)}
-      />
-      <label htmlFor="contained-button-attached">
-        {filesUploadedItems.fileUploaded && (
-          <Tooltip title="Upload new attached file">
-            <Button
-              sx={{ mt: 3, mb: 3 }}
-              variant="outlined"
-              color="primary"
-              component="span"
-              startIcon={<AddCircleOutlineIcon />}
-            >
-              Añadir adjunto
-            </Button>
-          </Tooltip>
-        )}
-      </label>
-      <br />
       <Button
         onClick={props.handleUploadFile}
         variant="contained"
@@ -237,4 +166,5 @@ export default function SelectedListItem(props) {
 SelectedListItem.propTypes = {
   handleUploadFile: PropTypes.func.isRequired,
   handleSelectedFileChange: PropTypes.func.isRequired,
+  resetOptions: PropTypes.func.isRequired,
 };

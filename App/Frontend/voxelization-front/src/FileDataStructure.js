@@ -41,9 +41,6 @@ export class FilesStructure {
       }
     }
   }
-  addAttachedFile(newDataStructure) {
-    this.fileUploaded._addAttachedFile(newDataStructure);
-  }
 
   clone() {
     return new FilesStructure(this.fileUploaded);
@@ -51,63 +48,24 @@ export class FilesStructure {
 }
 
 export class SingleFileDataStructure {
-  constructor(
-    fileName,
-    extension,
-    prePath,
-    isDemoFile,
-    file = null,
-    isAttached
-  ) {
+  constructor(fullNameFile, file = null) {
     this.id = uuidv4();
-    this.fileName = fileName + extension;
-    this.isDemo = isDemoFile;
-    this.errores = [
-      // ["ERROR", "Demasiados objetos"],
-      // ["WARN", "Demasiados objetos"],
-    ];
-    this.attachedFiles = {};
-    this.isAttached = isAttached;
-    if (!isDemoFile) {
-      this.pathFile = URL.createObjectURL(file);
-      this.originalPathFile = this.pathFile;
-    } else {
-      this.pathFile = prePath + fileName + extension;
-      this.originalPathFile = prePath + fileName + extension;
-    }
+    this.fileName = fullNameFile;
+    this.isDemo = !file;
+    this.pathModifiedFile = null;
+    if (this.isDemo)
+      this.pathFile = Constants.ROOT_MODELS_DEMOS_PATH + fullNameFile;
+    else this.pathFile = URL.createObjectURL(file);
+    // var file_name = file ? file.name.split(".")[0] : fullNameFile.split(".")[0];
+    // var file_ext = file ? file.name.split(".")[1] : fullNameFile.split(".")[1];
+    // this.errores = [
+    //   // ["ERROR", "Demasiados objetos"],
+    //   // ["WARN", "Demasiados objetos"],
+    // ];
   }
 
-  _getAttachedByID(ID) {
-    var file = this.attachedFiles[ID];
-    return file;
-  }
-
-  _removeAttachedFile(ID) {
-    delete this.attachedFiles[ID];
-  }
-
-  _addAttachedFile(newDataStructure) {
-    this.attachedFiles[newDataStructure.id] = newDataStructure;
-  }
-
-  _getAttachedIDs() {
-    return Object.keys(this.attachedFiles);
-  }
-
-  getBlobs() {
-    let fileNames = [];
-    let promises = [];
-    // Main file
-    promises.push(this._getBlobByURL(this.pathFile));
-    fileNames.push(this.fileName);
-    // Attacheds files
-    Object.keys(this.attachedFiles).forEach((ID) => {
-      let f = this._getAttachedByID(ID);
-      promises.push(this._getBlobByURL(f.pathFile));
-      fileNames.push(f.fileName);
-    });
-    let masterPromise = Promise.allSettled(promises);
-    return { fileNames, masterPromise };
+  getFile() {
+    return this._getBlobByURL(this.pathFile);
   }
 
   async _getBlobByURL(URL) {
@@ -116,15 +74,11 @@ export class SingleFileDataStructure {
   }
 }
 
+// Carga de DEMOS
 const DEMOS = {};
 if (Constants.DEMOS_MODELS) {
   Constants.DEMOS_MODELS.forEach((value) => {
-    var newFile = new SingleFileDataStructure(
-      value,
-      Constants.DEMOS_EXTENSION,
-      Constants.ROOT_MODELS_DEMOS_PATH,
-      true
-    );
+    var newFile = new SingleFileDataStructure(value, null);
     DEMOS[newFile.id] = newFile;
   });
 }

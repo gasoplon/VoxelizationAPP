@@ -215,9 +215,9 @@ export function RenderBox(props) {
   return <div ref={canvasRef} />;
 }
 
-//TODO:
-RenderBox.propTypes = {
-  // selectedModel: PropTypes.any.isRequired,
-};
+// //TODO:
+// RenderBox.propTypes = {
+//   selectedModel: PropTypes.any.isRequired,
+// };
 
 export default RenderBox;
