@@ -1,16 +1,20 @@
 import logging
 import os
+# from mosaic_generation import *
 
 import ERROR_CODES
 from Exceptions import *
 from config import config
 from re import *
-
 # Constantes
-BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {}'
+BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
 
 # Logger
 logger = logging.getLogger(__name__)
+
+
+def list_to_string(list):
+    return ''.join(list)
 
 
 def allowed_file_extension(filename, extensions):
@@ -26,27 +30,15 @@ def checkFileUploaded(files):
 
     if not allowed_file_extension(mainFile.filename, config['ALLOWED_EXTENSIONS_MODEL_FILE']):
         raise InvalidAPIParameterException(
-            ERROR_CODES.NOT_ALLOWED_FILE_EXTENSION_ERROR_012)
+            ERROR_CODES.NOT_ALLOWED_FILE_EXTENSION_ERROR_012, list_to_string(config['ALLOWED_EXTENSIONS_MODEL_FILE']))
 
-    # Get attached files
-    attachedFiles = []
-    if(config['API_PARAM_ATTACHED_FILES'] in files):
-        attachedFiles = files[config['API_PARAM_ATTACHED_FILES']]
-
-        if attachedFiles:
-            logger.debug(attachedFiles)
-            if not allowed_file_extension(attachedFiles.filename, config['ALLOWED_EXTENSIONS_ATTACHED_FILES']):
-                raise InvalidAPIParameterException(
-                    ERROR_CODES.NOT_ALLOWED_FILE_EXTENSION_ERROR_012)
-
-    return mainFile, attachedFiles
+    return mainFile
 
 
 # METODOS DE VOXELIZACION
-def voxelization(file_name, resolution=4, removeDisconnectedElements=False):
-    # os.system(BLENDER_COMMAND.format(config['DIRECTORY_UPLOADED_FILE'] +'/'+ file_name, config['FILES_PROCESSED'] + '/' + file_name))
+def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
     formatted_command = BLENDER_COMMAND.format(
-        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements)
+        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements, UUID, config['DIRECTORY_FILES_BAKED_TEXTURES'], config['BAKED_FILES_EXTENSION'])
     output = os.popen(formatted_command)
     print(output.read())
     errors = findall("ERR_CODE: \d", output.read())
@@ -55,4 +47,10 @@ def voxelization(file_name, resolution=4, removeDisconnectedElements=False):
         if('1' in e):
             raise InvalidAPIParameterException(
                 ERROR_CODES.NO_SINGLE_ELEMENT_IN_FILE_ERROR_030)
+    return None
+
+
+def MinecraftTexturing(UUID):
+    # mosaic('.\\' + config['DIRECTORY_FILES_BAKED_TEXTURES'] + "\\" + UUID +
+    #        config['BAKED_FILES_EXTENSION'], config["DIRECTORY_MINECRAFT_TEXTURES"])
     return None

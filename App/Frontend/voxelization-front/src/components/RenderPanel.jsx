@@ -11,9 +11,7 @@ import { Notifications } from "./Notifications";
 export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
   // Información del objeto seleccionado
-  const [selectedFile, setSelectedFile] = useState(
-    Constants.DEFAULT_MODEL_PATH
-  );
+  const [selectedFile, setSelectedFile] = useState();
   const [resolutionVoxel, setResolutionVoxel] = useState(
     Constants.DEFAULT_VOXELIZATION_RESOLUTION
   );
@@ -35,31 +33,19 @@ export function RenderPanel() {
     if (selectedFile === null) return;
 
     // GET files a partir de las URLs de los Blobs
-    let { fileNames, masterPromise } = selectedFile.getBlobs();
-    masterPromise.then((blobs) => {
-      // console.log(fileNames);
-      // console.log(blobs);
+    let getFilePromise = selectedFile.getFile();
+    getFilePromise.then((file) => {
       // Form Data Creation
       const formData = new FormData();
 
       // Main file
-      formData.append("modelFile", blobs[0].value, fileNames[0]);
+      formData.append("modelFile", file, selectedFile.fileName);
 
       // Update the formData object with resolution
       formData.append("resolutionVoxel", resolutionVoxel);
 
       // Update the formData object with useRemoveDisconnected
       formData.append("useRemoveDisconnected", useRemoveDisconnected);
-      console.log(blobs);
-      if (blobs.length > 1) {
-        blobs.shift();
-        let cont = 1;
-        for (let file of blobs) {
-          formData.append("attachedFiles", file.value, fileNames[cont]);
-          cont++;
-        }
-      }
-      console.log(formData);
 
       // Send formData object
       axios
