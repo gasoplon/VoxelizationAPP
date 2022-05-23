@@ -134,7 +134,7 @@ def receive_file():
     response = jsonify({'message': 'Ok'})
     # return response
     # TODO: CODIGOS DE ERROR
-    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=str(new_UUID)+'.obj', as_attachment=True)
+    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=file_name, as_attachment=True)
 
 
 if __name__ == '__main__':

@@ -37,8 +37,6 @@ export function RenderPanel() {
     // GET files a partir de las URLs de los Blobs
     let { fileNames, masterPromise } = selectedFile.getBlobs();
     masterPromise.then((blobs) => {
-      // console.log(fileNames);
-      // console.log(blobs);
       // Form Data Creation
       const formData = new FormData();
 
@@ -50,16 +48,6 @@ export function RenderPanel() {
 
       // Update the formData object with useRemoveDisconnected
       formData.append("useRemoveDisconnected", useRemoveDisconnected);
-      console.log(blobs);
-      if (blobs.length > 1) {
-        blobs.shift();
-        let cont = 1;
-        for (let file of blobs) {
-          formData.append("attachedFiles", file.value, fileNames[cont]);
-          cont++;
-        }
-      }
-      console.log(formData);
 
       // Send formData object
       axios

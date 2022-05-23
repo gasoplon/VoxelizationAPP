@@ -13,11 +13,12 @@ OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 ANGLE_LIMIT = 1.15191731  # 66º
 ITERATIONS_SUBDIVIDE = 7  # Nº de iteraciones del subdivide
 APPLY_MODIFIERS = {
-    "subdivide": False,
+    "subdivide": True,
     "remesh": True,
-    "generateUVs": False,
-    "shrinkWrap": False,
-    "bake": False
+    "generateUVs": True,
+    "shrinkWrap": True,
+    "bake": True,
+    "triToQuad": True
 }
 # /////////////////  FUNCS AUXS.  ////////////////////////////
 
@@ -196,15 +197,17 @@ if(APPLY_MODIFIERS["bake"]):
     texture_image.save_render(
         filepath='.\\' + baked_directory + "\\" + file_name + baked_file_extension)
 
-# Select object to export
-# deselectAllObjects()
+if(APPLY_MODIFIERS["triToQuad"]):
+    # Select object to export
+    deselectAllObjects()
+    select_one_object(remeshed_object)
+    # Remove triangles UVs
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.tris_convert_to_quads()
+    bpy.ops.object.editmode_toggle()
+
 select_one_object(remeshed_object)
-# Remove triangles UVs
-# bpy.ops.object.editmode_toggle()
-# bpy.ops.mesh.select_all(action='SELECT')
-# print(bpy.context.object)
-# print(bpy.ops.mesh.tris_convert_to_quads())
-# bpy.ops.object.editmode_toggle()
 
 # Export objects
 bpy.ops.export_scene.gltf(
