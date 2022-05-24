@@ -11,14 +11,12 @@ OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 
 # Conf
 ANGLE_LIMIT = 1.15191731  # 66º
-ITERATIONS_SUBDIVIDE = 7  # Nº de iteraciones del subdivide
 APPLY_MODIFIERS = {
-    "subdivide": True,
     "remesh": True,
     "generateUVs": True,
-    "shrinkWrap": True,
+    "extrude": True,
     "bake": True,
-    "triToQuad": True
+    "triToQuad": False
 }
 # /////////////////  FUNCS AUXS.  ////////////////////////////
 
@@ -29,16 +27,10 @@ def setActive(obj):
 
 def selectAllObjects():
     bpy.ops.object.select_all(action='SELECT')
-    # setActive(None)
-    # for o in all_objects:
-    #     o.select_set(True)
 
 
 def deselectAllObjects():
     bpy.ops.object.select_all(action='DESELECT')
-    # setActive(None)
-    # for o in all_objects:
-    #     o.select_set(False)
 
 
 def select_one_object(object_selected):
@@ -57,7 +49,7 @@ argv = argv[argv.index("--") + 1:]
 obj_in = argv[0]
 obj_out = argv[1]
 resolution = argv[2]
-removeDisconnectedElements = argv[3]
+removeDisconnectedElements = True if argv[3] == "true" else False
 file_name = argv[4]
 baked_directory = argv[5]
 baked_file_extension = argv[6]
@@ -79,44 +71,27 @@ if(len(obj_names) != 4 or obj_name == None):
     print(ERROR_NOT_ONE_ELEMENT_ON_SCENE['desc'])
     exit(ERROR_NOT_ONE_ELEMENT_ON_SCENE['code'])
 
-for area in bpy.context.screen.areas:
-    if area.type == 'OUTLINED':
-        space_data = area.spaces.active
-        break
+# for area in bpy.context.screen.areas:
+#     if area.type == 'OUTLINED':
+#         space_data = area.spaces.active
+#         break
 
 # Copia original seleccionada para crear duplicada
 original_object = bpy.data.objects[obj_name]
 select_one_object(original_object)
 
 # Duplicado
-bpy.ops.object.duplicate()
-bpy.ops.object.duplicate()
+# bpy.ops.object.duplicate()
 
 # Get new objects
-shrinkwrapped_object = bpy.data.objects[1]
-remeshed_object = bpy.data.objects[2]
-shrinkwrapped_object.name = "Shrinkwrapped_Object"
+remeshed_object = bpy.data.objects[0]
 remeshed_object.name = "Remeshed_Object"
-all_objects = [shrinkwrapped_object, remeshed_object]
 
-# Remove useless objects
-remove_object(original_object)
+cage_remeshed_object = None
+
+all_objects = [cage_remeshed_object, remeshed_object]
 
 deselectAllObjects()
-
-# BMeshes
-bmesh_shrinkwrapped_object = bmesh.new()
-
-# Add extra vertices
-if(APPLY_MODIFIERS["subdivide"]):
-    # Remove UV mappings
-    bmesh_shrinkwrapped_object.from_mesh(shrinkwrapped_object.data)
-    # Subdivide
-    bmesh.ops.subdivide_edges(bmesh_shrinkwrapped_object,
-                              edges=bmesh_shrinkwrapped_object.edges,
-                              cuts=ITERATIONS_SUBDIVIDE)
-    bmesh_shrinkwrapped_object.to_mesh(shrinkwrapped_object.data)
-    shrinkwrapped_object.data.update()
 
 # Remesh(Voxelization)
 if(APPLY_MODIFIERS["remesh"]):
@@ -125,47 +100,46 @@ if(APPLY_MODIFIERS["remesh"]):
         type='REMESH', name="Remesh")
     modifierRemesh.mode = "BLOCKS"
     modifierRemesh.octree_depth = int(resolution)
-    modifierRemesh.use_remove_disconnected = bool(removeDisconnectedElements)
+    modifierRemesh.use_remove_disconnected = removeDisconnectedElements
     bpy.ops.object.modifier_apply(
         modifier=modifierRemesh.name
     )
+    # Duplicado
+    bpy.ops.object.duplicate()
+    cage_remeshed_object = bpy.data.objects[1]
+    cage_remeshed_object.name = "Cage_Remeshed_Object"
     deselectAllObjects()
 
 
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):
     deselectAllObjects()
+    select_one_object(remeshed_object)
+    lm = remeshed_object.data.uv_layers.get("LightMap")
+    if not lm:
+        lm = remeshed_object.data.uv_layers.new(name="LightMap")
+    lm.active = True
+    bpy.ops.mesh.uv_texture_remove()
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
+    bpy.ops.object.editmode_toggle()
+    remeshed_object.select_set(False)
 
-    for obj in all_objects:
-        if (obj.type == 'MESH'):
-            select_one_object(obj)
-            lm = obj.data.uv_layers.get("LightMap")
-            if not lm:
-                lm = obj.data.uv_layers.new(name="LightMap")
-            lm.active = True
-            bpy.ops.mesh.uv_texture_remove()
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
-            bpy.ops.object.editmode_toggle()
-            obj.select_set(False)
-
-# Shrinkwrap
-if(APPLY_MODIFIERS["shrinkWrap"]):
-    select_one_object(shrinkwrapped_object)
-    modifierShrinkwrap = shrinkwrapped_object.modifiers.new(
-        type='SHRINKWRAP', name="Shrinkwrap")
-    modifierShrinkwrap.target = remeshed_object
-    modifierShrinkwrap.wrap_method = 'NEAREST_SURFACEPOINT'
-    bpy.ops.object.modifier_apply(
-        modifier=modifierShrinkwrap.name
-    )
+if(APPLY_MODIFIERS["extrude"]):
+    deselectAllObjects()
+    select_one_object(cage_remeshed_object)
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.transform.shrink_fatten(value=0.03)
+    bpy.ops.object.editmode_toggle()
+    remeshed_object.select_set(False)
 
 # Bake
 if(APPLY_MODIFIERS["bake"]):
 
     image_name = remeshed_object.name + '_BakedTexture'
-    texture_image = bpy.data.images.new(image_name, 2048, 2048)
+    texture_image = bpy.data.images.new(image_name, 1024, 1024)
 
     # Delete materials from remeshed object
     remeshed_object.data.materials.clear()
@@ -184,14 +158,16 @@ if(APPLY_MODIFIERS["bake"]):
         "cycles"
     ].preferences.compute_device_type = "CUDA"
     bpy.context.scene.cycles.device = "GPU"
-    bpy.context.preferences.addons["cycles"].preferences.get_devices()
+    # bpy.context.preferences.addons["cycles"].preferences.get_devices()
 
     # Select obj to bake
+    # deselectAllObjects()
     select_one_object(remeshed_object)
+    original_object.select_set(True)
 
     # Bake
     bpy.ops.object.bake(type="DIFFUSE", pass_filter={
-        "COLOR"}, use_selected_to_active=True, margin=0)
+        "COLOR"}, use_selected_to_active=True, margin=0, cage_object=cage_remeshed_object.name)
 
     # Save texture image
     texture_image.save_render(
@@ -207,7 +183,10 @@ if(APPLY_MODIFIERS["triToQuad"]):
     bpy.ops.mesh.tris_convert_to_quads()
     bpy.ops.object.editmode_toggle()
 
-select_one_object(remeshed_object)
+# select_one_object(remeshed_object)
+
+selectAllObjects()
+
 
 # Export objects
 bpy.ops.export_scene.gltf(
