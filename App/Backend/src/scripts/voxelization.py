@@ -1,6 +1,7 @@
 import bpy
 import sys
 import bmesh
+import time
 # ////////////////////////  CTES  /////////////////////////////
 
 DESC_FORMAT = "ERR_CODE: {} - {}."  # Errores
@@ -18,6 +19,11 @@ APPLY_MODIFIERS = {
     "bake": True,
     "triToQuad": False
 }
+
+# TIMES
+TIMES_STR = "########## TIMES ##########\n"
+TIMES_STR_FIN = "###########################\n"
+
 # /////////////////  FUNCS AUXS.  ////////////////////////////
 
 
@@ -53,6 +59,11 @@ removeDisconnectedElements = True if argv[3] == "true" else False
 file_name = argv[4]
 baked_directory = argv[5]
 baked_file_extension = argv[6]
+
+# TimeStamp
+DEBUG_TIME = True
+start = None
+end = None
 
 # Importar escena
 bpy.ops.import_scene.gltf(filepath=obj_in)
@@ -95,6 +106,8 @@ deselectAllObjects()
 
 # Remesh(Voxelization)
 if(APPLY_MODIFIERS["remesh"]):
+    if(DEBUG_TIME):
+        start = time.time()
     select_one_object(remeshed_object)
     modifierRemesh = remeshed_object.modifiers.new(
         type='REMESH', name="Remesh")
@@ -109,10 +122,15 @@ if(APPLY_MODIFIERS["remesh"]):
     cage_remeshed_object = bpy.data.objects[1]
     cage_remeshed_object.name = "Cage_Remeshed_Object"
     deselectAllObjects()
+    if(DEBUG_TIME):
+        end = time.time()
+        TIMES_STR += "Remesh Time:\t" + str(end-start) + "\n"
 
 
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):
+    if(DEBUG_TIME):
+        start = time.time()
     deselectAllObjects()
     select_one_object(remeshed_object)
     lm = remeshed_object.data.uv_layers.get("LightMap")
@@ -125,8 +143,13 @@ if(APPLY_MODIFIERS["generateUVs"]):
     bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
     bpy.ops.object.editmode_toggle()
     remeshed_object.select_set(False)
+    if(DEBUG_TIME):
+        end = time.time()
+        TIMES_STR += "Generate UVs Time:\t" + str(end-start) + "\n"
 
 if(APPLY_MODIFIERS["extrude"]):
+    if(DEBUG_TIME):
+        start = time.time()
     deselectAllObjects()
     select_one_object(cage_remeshed_object)
     bpy.ops.object.editmode_toggle()
@@ -134,10 +157,14 @@ if(APPLY_MODIFIERS["extrude"]):
     bpy.ops.transform.shrink_fatten(value=0.03)
     bpy.ops.object.editmode_toggle()
     remeshed_object.select_set(False)
+    if(DEBUG_TIME):
+        end = time.time()
+        TIMES_STR += "Extrude Time:\t" + str(end-start) + "\n"
 
 # Bake
 if(APPLY_MODIFIERS["bake"]):
-
+    if(DEBUG_TIME):
+        start = time.time()
     image_name = remeshed_object.name + '_BakedTexture'
     texture_image = bpy.data.images.new(image_name, 1024, 1024)
 
@@ -161,19 +188,31 @@ if(APPLY_MODIFIERS["bake"]):
     # bpy.context.preferences.addons["cycles"].preferences.get_devices()
 
     # Select obj to bake
-    # deselectAllObjects()
-    select_one_object(remeshed_object)
+    deselectAllObjects()
+    remeshed_object.select_set(True)
     original_object.select_set(True)
+    setActive(original_object)
+    print(bpy.context.selected_objects)
+    print(bpy.context.active_object)
+
+    # select_one_object(remeshed_object)
+    # # original_object.select_set(True)
 
     # Bake
     bpy.ops.object.bake(type="DIFFUSE", pass_filter={
         "COLOR"}, use_selected_to_active=True, margin=0, cage_object=cage_remeshed_object.name)
+
+    if(DEBUG_TIME):
+        end = time.time()
+        TIMES_STR += "Bake Time:\t" + str(end-start) + "\n"
 
     # Save texture image
     texture_image.save_render(
         filepath='.\\' + baked_directory + "\\" + file_name + baked_file_extension)
 
 if(APPLY_MODIFIERS["triToQuad"]):
+    if(DEBUG_TIME):
+        start = time.time()
     # Select object to export
     deselectAllObjects()
     select_one_object(remeshed_object)
@@ -182,6 +221,12 @@ if(APPLY_MODIFIERS["triToQuad"]):
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.tris_convert_to_quads()
     bpy.ops.object.editmode_toggle()
+    if(DEBUG_TIME):
+        end = time.time()
+        TIMES_STR += "Tri2Quad Time:\t" + str(end-start) + "\n"
+
+if(DEBUG_TIME):
+    print(TIMES_STR + TIMES_STR_FIN)
 
 # select_one_object(remeshed_object)
 
