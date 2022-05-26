@@ -2,6 +2,7 @@ import bpy
 import sys
 import bmesh
 import time
+import glob
 # ////////////////////////  CTES  /////////////////////////////
 
 DESC_FORMAT = "ERR_CODE: {} - {}."  # Errores
@@ -11,17 +12,19 @@ ERROR_NOT_ONE_ELEMENT_ON_SCENE = {
 OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 
 # Conf
+UV_IMAGE_RESOLUTION = 2048
 ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
+    "triToQuad": True,
     "generateUVs": True,
     "extrude": True,
     "bake": True,
-    "triToQuad": False
+    "buildMosaic": False
 }
 
 # TIMES
-TIMES_STR = "########## TIMES ##########\n"
+TIMES_STR = "\n########## TIMES ##########\n"
 TIMES_STR_FIN = "###########################\n"
 
 # /////////////////  FUNCS AUXS.  ////////////////////////////
@@ -59,6 +62,7 @@ removeDisconnectedElements = True if argv[3] == "true" else False
 file_name = argv[4]
 baked_directory = argv[5]
 baked_file_extension = argv[6]
+# tiles_directory_path = argv[7]
 
 # TimeStamp
 DEBUG_TIME = True
@@ -82,10 +86,10 @@ if(len(obj_names) != 4 or obj_name == None):
     print(ERROR_NOT_ONE_ELEMENT_ON_SCENE['desc'])
     exit(ERROR_NOT_ONE_ELEMENT_ON_SCENE['code'])
 
-# for area in bpy.context.screen.areas:
-#     if area.type == 'OUTLINED':
-#         space_data = area.spaces.active
-#         break
+for area in bpy.context.screen.areas:
+    if area.type == 'OUTLINED':
+        space_data = area.spaces.active
+        break
 
 # Copia original seleccionada para crear duplicada
 original_object = bpy.data.objects[obj_name]
@@ -126,6 +130,20 @@ if(APPLY_MODIFIERS["remesh"]):
         end = time.time()
         TIMES_STR += "Remesh Time:\t" + str(end-start) + "\n"
 
+if(APPLY_MODIFIERS["triToQuad"]):
+    if(DEBUG_TIME):
+        start = time.time()
+    # Select object to export
+    deselectAllObjects()
+    select_one_object(remeshed_object)
+    # Remove triangles UVs
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.tris_convert_to_quads()
+    bpy.ops.object.editmode_toggle()
+    if(DEBUG_TIME):
+        end = time.time()
+        TIMES_STR += "Tri2Quad Time:\t" + str(end-start) + "\n"
 
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):
@@ -166,7 +184,8 @@ if(APPLY_MODIFIERS["bake"]):
     if(DEBUG_TIME):
         start = time.time()
     image_name = remeshed_object.name + '_BakedTexture'
-    texture_image = bpy.data.images.new(image_name, 1024, 1024)
+    texture_image = bpy.data.images.new(
+        image_name, UV_IMAGE_RESOLUTION, UV_IMAGE_RESOLUTION)
 
     # Delete materials from remeshed object
     remeshed_object.data.materials.clear()
@@ -210,30 +229,42 @@ if(APPLY_MODIFIERS["bake"]):
     texture_image.save_render(
         filepath='.\\' + baked_directory + "\\" + file_name + baked_file_extension)
 
-if(APPLY_MODIFIERS["triToQuad"]):
-    if(DEBUG_TIME):
-        start = time.time()
-    # Select object to export
-    deselectAllObjects()
-    select_one_object(remeshed_object)
-    # Remove triangles UVs
-    bpy.ops.object.editmode_toggle()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.tris_convert_to_quads()
-    bpy.ops.object.editmode_toggle()
-    if(DEBUG_TIME):
-        end = time.time()
-        TIMES_STR += "Tri2Quad Time:\t" + str(end-start) + "\n"
 
 if(DEBUG_TIME):
     print(TIMES_STR + TIMES_STR_FIN)
 
-# select_one_object(remeshed_object)
+####################################### MOSAIC ##############################################
+# Procesamiento de imagenes con las que se generará el mosaico
+# if(APPLY_MODIFIERS["buildMosaic"]):
+# Get tile files
+# tiles = []
+# for path_tile_file in glob.glob(tiles_directory_path):
+#     tile = Image.open(path_tile_file)
+#     # tile = tile.resize(tile_size)
+#     tiles.append(tile)
 
-selectAllObjects()
+# # Calcular el color dominante de cada imagen
+# colors = []
+# for tile in tiles:
+#     mean_color = np.array(tile).mean(axis=0).mean(axis=0)
+#     colors.append(mean_color)
+
+# espacial_color = spatial.KDTree(colors)
+
+# closest_tiles = np.zeros(
+#     (UV_IMAGE_RESOLUTION, UV_IMAGE_RESOLUTION), dtype=np.uint32)
+
+# for i in range(UV_IMAGE_RESOLUTION):
+#     for j in range(UV_IMAGE_RESOLUTION):
+#         closest = espacial_color.query(resized_photo.getpixel((i, j)))
+#         closest_tiles[i, j] = closest[1]
+
+#############################################################################################
 
 
 # Export objects
+# select_one_object(remeshed_object)
+selectAllObjects()
 bpy.ops.export_scene.gltf(
     filepath=obj_out, export_format='GLB', use_selection=True, export_materials='EXPORT', export_apply=True)
 ##################################################################################################################
