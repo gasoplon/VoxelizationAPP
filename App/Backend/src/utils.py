@@ -1,13 +1,28 @@
 import logging
 import os
+from statistics import mean
 # from mosaic_generation import *
 
 import ERROR_CODES
 from Exceptions import *
 from config import config
 from re import *
+
+from PIL import Image
+from scipy import spatial
+import numpy as np
+import glob
+
+import time
+
 # Constantes
 BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
+
+# TimeStamp
+DEBUG_TIME = False
+start = None
+end = None
+
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -50,7 +65,22 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
     return None
 
 
-def MinecraftTexturing(UUID):
-    # mosaic('.\\' + config['DIRECTORY_FILES_BAKED_TEXTURES'] + "\\" + UUID +
-    #        config['BAKED_FILES_EXTENSION'], config["DIRECTORY_MINECRAFT_TEXTURES"])
-    return None
+def Mosaic():
+    # start = time.time()
+    # Configuracion
+    main_file = "..\\TEXTURAS_Y_MODELOS\\UV_DE_REFERENCIA.png"
+    main_photo = Image.open(main_file)
+
+    colors = []
+    for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
+        tile_img = Image.open(
+            config['DIRECTORY_MINECRAFT_TEXTURES'] + '\\'+tile_path)
+        mean_color = np.array(tile_img).mean(axis=0).mean(axis=0)
+        if(mean_color.shape and mean_color.shape[0] == 4):
+            colors.append(mean_color)
+
+    tree = spatial.KDTree(colors)
+    # end = time.time()
+    # print("TIME: " + str(end-start))
+
+    pass

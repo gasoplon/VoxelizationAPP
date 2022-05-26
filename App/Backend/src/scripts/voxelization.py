@@ -12,15 +12,15 @@ ERROR_NOT_ONE_ELEMENT_ON_SCENE = {
 OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 
 # Conf
-UV_IMAGE_RESOLUTION = 2048
+UV_IMAGE_RESOLUTION = 1024
 ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
     "triToQuad": False,
     "generateUVs": True,
-    "extrude": True,
-    "bake": True,
-    "buildMosaic": False
+    "exportUVs": True,
+    "extrude": False,
+    "bake": False,
 }
 
 # TIMES
@@ -62,10 +62,9 @@ removeDisconnectedElements = True if argv[3] == "true" else False
 file_name = argv[4]
 baked_directory = argv[5]
 baked_file_extension = argv[6]
-# tiles_directory_path = argv[7]
 
 # TimeStamp
-DEBUG_TIME = True
+DEBUG_TIME = False
 start = None
 end = None
 
@@ -160,6 +159,11 @@ if(APPLY_MODIFIERS["generateUVs"]):
     bpy.ops.object.editmode_toggle()
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
+
+    # remeshed_object.data.uv_layers[0].active = True
+    # o = remeshed_object.data.uv_layers.active.data[0].uv
+    # print(type(o))
+    # print(o)
     bpy.ops.object.editmode_toggle()
     remeshed_object.select_set(False)
     if(DEBUG_TIME):
@@ -229,38 +233,15 @@ if(APPLY_MODIFIERS["bake"]):
 if(DEBUG_TIME):
     print(TIMES_STR + TIMES_STR_FIN)
 
-####################################### MOSAIC ##############################################
-# Procesamiento de imagenes con las que se generará el mosaico
-# if(APPLY_MODIFIERS["buildMosaic"]):
-# Get tile files
-# tiles = []
-# for path_tile_file in glob.glob(tiles_directory_path):
-#     tile = Image.open(path_tile_file)
-#     # tile = tile.resize(tile_size)
-#     tiles.append(tile)
-
-# # Calcular el color dominante de cada imagen
-# colors = []
-# for tile in tiles:
-#     mean_color = np.array(tile).mean(axis=0).mean(axis=0)
-#     colors.append(mean_color)
-
-# espacial_color = spatial.KDTree(colors)
-
-# closest_tiles = np.zeros(
-#     (UV_IMAGE_RESOLUTION, UV_IMAGE_RESOLUTION), dtype=np.uint32)
-
-# for i in range(UV_IMAGE_RESOLUTION):
-#     for j in range(UV_IMAGE_RESOLUTION):
-#         closest = espacial_color.query(resized_photo.getpixel((i, j)))
-#         closest_tiles[i, j] = closest[1]
-
-#############################################################################################
-
-
 # Export objects
-# select_one_object(remeshed_object)
-selectAllObjects()
+select_one_object(remeshed_object)
+if(APPLY_MODIFIERS["exportUVs"]):
+    verts = []
+    me = bpy.context.object.data
+    uv_layer = me.uv_layers.active.data
+    for poly in me.polygons:
+        for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            print("    UV: %r" % uv_layer[loop_index].uv)
 bpy.ops.export_scene.gltf(
     filepath=obj_out, export_format='GLB', use_selection=True, export_materials='EXPORT', export_apply=True)
 ##################################################################################################################

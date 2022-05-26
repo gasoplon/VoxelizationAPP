@@ -80,7 +80,6 @@ def receive_file():
     # Usar eliminar elementos inconexos
     try:
         removeDisconnectedElements = request.form[config['API_PARAM_USE_REMOVE_DISCONNECTED']]
-        print(removeDisconnectedElements)
     except KeyError as e:
         removeDisconnectedElements = None
 
@@ -120,12 +119,11 @@ def receive_file():
         file_name = str(new_UUID) + '.' + ext
         file.save(os.path.join(uploads_dir, file_name))
 
-        # Voxelization with textures Algorithm
+        # Voxelization with textures Algorithm and Mosaic generation
         Voxelization(new_UUID, file_name, resolution,
                      removeDisconnectedElements)
 
-        # TODO: Mosaico
-        MinecraftTexturing(new_UUID)
+        # Mosaic()
 
     # TODO: Minecraft Command.......
 

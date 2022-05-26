@@ -10,10 +10,10 @@ config = {
     # APP Config
     'DEVELOPMENT_CONFIG': DevelopmentConfig,
     # Directories
-    'DIRECTORY_UPLOADED_FILE': '..\\models_files\\filesUploaded',
-    'DIRECTORY_FILES_PROCESSED': '..\\models_files\\filesProcessed',
-    'DIRECTORY_FILES_BAKED_TEXTURES': '..\\models_files\\bakedTextures',
-    'DIRECTORY_MINECRAFT_TEXTURES': '..\\models_files\\minecraft_textures\\block',
+    'DIRECTORY_UPLOADED_FILE': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesUploaded',
+    'DIRECTORY_FILES_PROCESSED': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesProcessed',
+    'DIRECTORY_FILES_BAKED_TEXTURES': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\bakedTextures',
+    'DIRECTORY_MINECRAFT_TEXTURES': '..\\TEXTURAS_Y_MODELOS\\MINECRAFT_TEXTURES',
     # API Parameters
     'API_PARAM_MAIN_FILE': 'modelFile',
     'API_PARAM_ATTACHED_FILES': 'attachedFiles',
