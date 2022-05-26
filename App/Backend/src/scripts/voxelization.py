@@ -82,7 +82,7 @@ for o in obj_names:
         remove_object(bpy.data.objects[o])
 
 # Comprobar que solo existe 1 objeto en la escena
-if(len(obj_names) != 4 or obj_name == None):
+if(len(obj_names) != 4 or obj_name is None):
     print(ERROR_NOT_ONE_ELEMENT_ON_SCENE['desc'])
     exit(ERROR_NOT_ONE_ELEMENT_ON_SCENE['code'])
 
@@ -212,8 +212,6 @@ if(APPLY_MODIFIERS["bake"]):
     remeshed_object.select_set(True)
     original_object.select_set(True)
     setActive(remeshed_object)
-    print(bpy.context.selected_objects)
-    print(bpy.context.active_object)
 
     # Bake
     bpy.ops.object.bake(type="DIFFUSE", pass_filter={
