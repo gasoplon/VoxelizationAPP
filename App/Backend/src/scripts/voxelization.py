@@ -16,7 +16,7 @@ UV_IMAGE_RESOLUTION = 2048
 ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
-    "triToQuad": True,
+    "triToQuad": False,
     "generateUVs": True,
     "extrude": True,
     "bake": True,
@@ -91,15 +91,16 @@ for area in bpy.context.screen.areas:
         space_data = area.spaces.active
         break
 
-# Copia original seleccionada para crear duplicada
-original_object = bpy.data.objects[obj_name]
-select_one_object(original_object)
+# Objeto original
+original_object = bpy.data.objects[0]
+original_object.name = "Original_Object"
 
-# Duplicado
-# bpy.ops.object.duplicate()
+# Duplicado del objeto original
+bpy.ops.object.duplicate()
+
 
 # Get new objects
-remeshed_object = bpy.data.objects[0]
+remeshed_object = bpy.data.objects[1]
 remeshed_object.name = "Remeshed_Object"
 
 cage_remeshed_object = None
@@ -123,7 +124,7 @@ if(APPLY_MODIFIERS["remesh"]):
     )
     # Duplicado
     bpy.ops.object.duplicate()
-    cage_remeshed_object = bpy.data.objects[1]
+    cage_remeshed_object = bpy.data.objects[2]
     cage_remeshed_object.name = "Cage_Remeshed_Object"
     deselectAllObjects()
     if(DEBUG_TIME):
@@ -172,7 +173,7 @@ if(APPLY_MODIFIERS["extrude"]):
     select_one_object(cage_remeshed_object)
     bpy.ops.object.editmode_toggle()
     bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.transform.shrink_fatten(value=0.03)
+    bpy.ops.transform.shrink_fatten(value=0.02314)
     bpy.ops.object.editmode_toggle()
     remeshed_object.select_set(False)
     if(DEBUG_TIME):
@@ -204,22 +205,19 @@ if(APPLY_MODIFIERS["bake"]):
         "cycles"
     ].preferences.compute_device_type = "CUDA"
     bpy.context.scene.cycles.device = "GPU"
-    # bpy.context.preferences.addons["cycles"].preferences.get_devices()
+    bpy.context.preferences.addons["cycles"].preferences.get_devices()
 
     # Select obj to bake
     deselectAllObjects()
     remeshed_object.select_set(True)
     original_object.select_set(True)
-    setActive(original_object)
+    setActive(remeshed_object)
     print(bpy.context.selected_objects)
     print(bpy.context.active_object)
 
-    # select_one_object(remeshed_object)
-    # # original_object.select_set(True)
-
     # Bake
     bpy.ops.object.bake(type="DIFFUSE", pass_filter={
-        "COLOR"}, use_selected_to_active=True, margin=0, cage_object=cage_remeshed_object.name)
+        "COLOR"}, use_selected_to_active=True, margin=0, use_cage=True, cage_object=cage_remeshed_object.name)
 
     if(DEBUG_TIME):
         end = time.time()
