@@ -80,6 +80,7 @@ def receive_file():
     # Usar eliminar elementos inconexos
     try:
         removeDisconnectedElements = request.form[config['API_PARAM_USE_REMOVE_DISCONNECTED']]
+        print(removeDisconnectedElements)
     except KeyError as e:
         removeDisconnectedElements = None
 
@@ -108,8 +109,6 @@ def receive_file():
     if(removeDisconnectedElements not in config['USE_REMOVE_DISCONNECTED_ELEMENTS_ALLOWED']):
         raise InvalidAPIParameterException(
             ERROR_CODES.INVALID_REMOVE_DISCONNECTED_ELEMENTS_TYPE_ERROR_014)
-
-    removeDisconnectedElements = bool(removeDisconnectedElements)
 
     # Analizar el fichero de entrada
     file = checkFileUploaded(request.files)

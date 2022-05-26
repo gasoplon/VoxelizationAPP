@@ -4,5 +4,9 @@
             "filePath": "App\\Frontend\\voxelization-front\\node_modules\\cdbreact",
             "group": "Default"
         }
-    ]
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.mypyEnabled": false
 }
