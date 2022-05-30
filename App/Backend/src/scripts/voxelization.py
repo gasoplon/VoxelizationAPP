@@ -19,8 +19,8 @@ APPLY_MODIFIERS = {
     "triToQuad": False,
     "generateUVs": True,
     "exportUVs": True,
-    "extrude": False,
-    "bake": False,
+    "extrude": True,
+    "bake": True,
 }
 
 # TIMES
@@ -235,13 +235,29 @@ if(DEBUG_TIME):
 
 # Export objects
 select_one_object(remeshed_object)
+VERTS_STR = ""
+
 if(APPLY_MODIFIERS["exportUVs"]):
-    verts = []
     me = bpy.context.object.data
     uv_layer = me.uv_layers.active.data
     for poly in me.polygons:
+        min_x = 1.0
+        min_y = 1.0
+        max_x = 0.0
+        max_y = 0.0
         for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
-            print("    UV: %r" % uv_layer[loop_index].uv)
+            if(uv_layer[loop_index].uv[0] < min_x):
+                min_x = uv_layer[loop_index].uv[0]
+            if(uv_layer[loop_index].uv[1] < min_y):
+                min_y = uv_layer[loop_index].uv[1]
+            if(uv_layer[loop_index].uv[0] > max_x):
+                max_x = uv_layer[loop_index].uv[0]
+            if(uv_layer[loop_index].uv[1] > max_y):
+                max_y = uv_layer[loop_index].uv[1]
+        new_poly = "[[" + str(min_x) + ", " + str(min_y) + \
+            "],[" + str(max_x) + ", " + str(max_y) + "]],"
+        VERTS_STR += new_poly
+    print("VERTICES_INI" + VERTS_STR + "VERTICES_FIN")
 bpy.ops.export_scene.gltf(
     filepath=obj_out, export_format='GLB', use_selection=True, export_materials='EXPORT', export_apply=True)
 ##################################################################################################################

@@ -55,31 +55,61 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
     formatted_command = BLENDER_COMMAND.format(
         config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements, UUID, config['DIRECTORY_FILES_BAKED_TEXTURES'], config['BAKED_FILES_EXTENSION'])
     output = os.popen(formatted_command)
-    print(output.read())
-    errors = findall("ERR_CODE: \d", output.read())
+    out_str = output.read()
+    print(out_str)
+    errors = findall("ERR_CODE: \d", out_str)
+    polygons = eval(search("VERTICES_INI(.+)VERTICES_FIN", out_str).group(1))
+    # logger.info(polygons)
     logger.error(errors)
     for e in errors:
         if('1' in e):
             raise InvalidAPIParameterException(
                 ERROR_CODES.NO_SINGLE_ELEMENT_IN_FILE_ERROR_030)
-    return None
+    return polygons
 
 
-def Mosaic():
+def Mosaic(polygons, UUID):
     # start = time.time()
     # Configuracion
-    main_file = "..\\TEXTURAS_Y_MODELOS\\UV_DE_REFERENCIA.png"
-    main_photo = Image.open(main_file)
+    main_photo = Image.open(
+        "..\\TEXTURAS_Y_MODELOS\\API_FILES\\bakedTextures\\" + UUID + ".png")
+    width, height = main_photo.size
+    mosaic_img = Image.new('RGB', (width, height))
+
+    tile_paths = []
+    for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
+        tile_paths.append(
+            str(config['DIRECTORY_MINECRAFT_TEXTURES'] + '\\'+tile_path))
+
+    tiles = []
+    tile_size = (int((polygons[0][1][0]-polygons[0][0][0]) *
+                 width), int((polygons[0][1][1]-polygons[0][0][1]) * height))
+    print(tile_size)
+    for path in tile_paths:
+        tile = Image.open(path)
+        tile = tile.resize(tile_size)
+        tiles.append(tile)
 
     colors = []
-    for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
-        tile_img = Image.open(
-            config['DIRECTORY_MINECRAFT_TEXTURES'] + '\\'+tile_path)
-        mean_color = np.array(tile_img).mean(axis=0).mean(axis=0)
+    for tile in tiles:
+        mean_color = np.array(tile).mean(axis=0).mean(axis=0)
         if(mean_color.shape and mean_color.shape[0] == 4):
             colors.append(mean_color)
 
     tree = spatial.KDTree(colors)
+
+    for p in polygons:
+        p[0][0] *= width
+        p[0][1] *= height
+        p[1][0] *= width
+        p[1][1] *= height
+        # Get crop image
+        crop_img = main_photo.crop((p[0][0], p[0][1], p[1][0], p[1][1]))
+        mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
+        closest = tree.query(mean_color)
+        mosaic_img.paste(tiles[closest[1]], (int(p[0][0]), int(p[0][1])))
+
+    mosaic_img.save("mosaic_img.jpg")
     # end = time.time()
     # print("TIME: " + str(end-start))
 

@@ -120,10 +120,10 @@ def receive_file():
         file.save(os.path.join(uploads_dir, file_name))
 
         # Voxelization with textures Algorithm and Mosaic generation
-        Voxelization(new_UUID, file_name, resolution,
-                     removeDisconnectedElements)
+        polygons = Voxelization(new_UUID, file_name, resolution,
+                                removeDisconnectedElements)
 
-        # Mosaic()
+        Mosaic(polygons, str(new_UUID))
 
     # TODO: Minecraft Command.......
 
