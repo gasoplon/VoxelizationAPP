@@ -77,22 +77,21 @@ def Mosaic(polygons, UUID):
         "..\\TEXTURAS_Y_MODELOS\\API_FILES\\bakedTextures\\" + UUID + ".png")
     width, height = main_photo.size
 
-    tile_paths = []
-    for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
-        tile_paths.append(
-            str(config['DIRECTORY_MINECRAFT_TEXTURES'] + '\\'+tile_path))
-
-    tiles = []
     # Cálculo del nº de tiles necesarias en cada eje
     tile_size = (polygons[0][1][0]-polygons[0][0][0])
     n_tiles = math.ceil(1.0 / tile_size)
     total_large = int(n_tiles * 16)
     mosaic_img = Image.new('RGB', (total_large, total_large))
-    for path in tile_paths:
-        tile = Image.open(path)
-        # tile = tile.resize(tile_size)
+
+    # Lecturas de texturas de las tiles
+    tiles = []
+    for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
+        absolute_tile_path = str(
+            config['DIRECTORY_MINECRAFT_TEXTURES'] + '\\'+tile_path)
+        tile = Image.open(absolute_tile_path)
         tiles.append(tile)
 
+    # Colores mas usados de las tiles
     colors = []
     for tile in tiles:
         mean_color = np.array(tile).mean(axis=0).mean(axis=0)
@@ -102,23 +101,34 @@ def Mosaic(polygons, UUID):
     tree = spatial.KDTree(colors)
 
     for p in polygons:
-        # p[0][0] *= width
-        # p[0][1] *= height
-        # p[1][0] *= width
-        # p[1][1] *= height
-        # Get crop image
-        crop_img = main_photo.crop(
-            (p[0][0] * width, p[0][1] * height, p[1][0] * width, p[1][1] * height))
+        # Get crop image (left, upper, right, lower)
+        A = [p[0][0] * width, (1.0 - p[0][1]) * height]
+        B = [p[1][0] * width, (1.0 - p[1][1]) * height]
+        crop_img = main_photo.crop((A[0], A[1], B[0], B[1]))
+
+        # Media de color
         mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
         closest = tree.query(mean_color)
-        sup_izq = (int(p[0][0] * total_large),  int(p[0][1] * total_large))
-        sup_der = (int(p[0][0] * total_large) +
-                   16,  int(p[0][1] * total_large))
-        inf_izq = (int(p[0][0] * total_large),
-                   int(p[0][1] * total_large) + 16)
-        inf_der = (int(p[1][0] * total_large),  int(p[1][1] * total_large))
-        mosaic_img.paste(tiles[closest[1]],
-                         box=(sup_izq, sup_der, inf_izq, inf_der))
+
+        # Cálculo del ángulo de rotación
+        # p0 = [p[1][0], p[1][1]]
+        # p1 = [p[0][0], p[0][1]]
+        # p2 = [p[0][0], p[0][1] + tile_size]
+        # # print(str(p[0][0])+", "+str(p[0][1]) +
+        # #       " -- "+str(p[1][0])+", "+str(p[1][1]))
+        # v0 = np.array(p0) - np.array(p1)
+        # v1 = np.array(p2) - np.array(p1)
+        # angle = np.degrees(np.math.atan2(
+        #     np.linalg.det([v0, v1]), np.dot(v0, v1)))
+        # print(angle)
+        # if(angle != 45.0):
+        #     tiles[closest[1]] = tiles[closest[1]].rotate(
+        #         angle=angle)
+
+        # Paste tile
+        sup_izq = (int(p[0][0] * total_large),
+                   int((1.0 - p[0][1]) * total_large))
+        mosaic_img.paste(tiles[closest[1]], sup_izq)
 
     mosaic_img.save("mosaic_img.jpg")
 

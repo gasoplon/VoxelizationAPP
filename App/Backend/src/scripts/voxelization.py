@@ -254,8 +254,8 @@ if(APPLY_MODIFIERS["exportUVs"]):
                 max_x = uv_layer[loop_index].uv[0]
             if(uv_layer[loop_index].uv[1] > max_y):
                 max_y = uv_layer[loop_index].uv[1]
-        new_poly = "[[" + str(min_x) + ", " + str(min_y) + \
-            "],[" + str(max_x) + ", " + str(max_y) + "]],"
+        new_poly = "[[" + str(min_x) + ", " + str(max_y) + \
+            "],[" + str(max_x) + ", " + str(min_y) + "]],"
         VERTS_STR += new_poly
     print("VERTICES_INI" + VERTS_STR + "VERTICES_FIN")
 bpy.ops.export_scene.gltf(
