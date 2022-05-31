@@ -258,6 +258,9 @@ if(APPLY_MODIFIERS["exportUVs"]):
             "],[" + str(max_x) + ", " + str(min_y) + "]],"
         VERTS_STR += new_poly
     print("VERTICES_INI" + VERTS_STR + "VERTICES_FIN")
+
+deselectAllObjects()
+select_one_object(remeshed_object)
 bpy.ops.export_scene.gltf(
     filepath=obj_out, export_format='GLB', use_selection=True, export_materials='EXPORT', export_apply=True)
 ##################################################################################################################

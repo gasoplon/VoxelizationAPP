@@ -55,7 +55,7 @@ export function RenderPanel() {
             type: "text/plain",
           });
           var state_copy = { ...selectedFile };
-          state_copy.pathFile = URL.createObjectURL(myblob);
+          state_copy.pathModifiedFile = URL.createObjectURL(myblob);
           setSelectedFile(state_copy);
         })
         .catch((err) => {

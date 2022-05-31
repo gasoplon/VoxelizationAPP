@@ -100,6 +100,9 @@ def Mosaic(polygons, UUID):
 
     tree = spatial.KDTree(colors)
 
+    # resized_photo = main_photo.resize((int(np.round(
+    #     main_photo.size[0] / tile_size[0])), int(np.round(main_photo.size[1] / tile_size[1]))))
+
     for p in polygons:
         # Get crop image (left, upper, right, lower)
         A = [p[0][0] * width, (1.0 - p[0][1]) * height]

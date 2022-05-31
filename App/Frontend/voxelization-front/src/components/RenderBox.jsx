@@ -1,24 +1,14 @@
 import React, { useEffect, createRef, useState } from "react";
 import {
   AmbientLight,
-  AnimationMixer,
-  AxesHelper,
   Box3,
   Cache,
   DirectionalLight,
-  GridHelper,
   HemisphereLight,
-  LinearEncoding,
-  LoaderUtils,
-  LoadingManager,
-  PMREMGenerator,
   PerspectiveCamera,
-  REVISION,
   Scene,
-  SkeletonHelper,
   Vector3,
   WebGLRenderer,
-  sRGBEncoding,
   Color,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -111,36 +101,40 @@ export function RenderBox(props) {
   window.addEventListener("resize", resize, false);
 
   const loadObject = () => {
-    if (props.selectedModel && props.selectedModel.pathFile)
-      loader.load(
-        // Archivo de carga
-        props.selectedModel.pathFile,
-        // LLamada cuando se termina de cargar el objeto
-        function (object) {
-          if (
-            object &&
-            object.scene &&
-            object.scene.children &&
-            object.scene.children.length === 1
-          ) {
-            setContent(object.scene);
-          } else {
-            // TODO: Set errors, eliminar hijos...
-            var new_state = { ...props.selectedModel };
-            new_state.errores.push(["WARN", "Demasiados objetos"]);
-            props.setSelectedModel(new_state);
-          }
-        },
-        // Llamada cuando está siendo cargado
-        //TODO: Quitar
-        function (xhr) {
-          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-        },
-        // TODO: Tratar errores
-        function (error) {
-          console.log("An error happened");
+    if (
+      props.selectedModel &&
+      (props.selectedModel.pathFile || props.selectedModel.pathModifiedFile)
+    ) {
+      const modelURL = props.selectedModel.pathModifiedFile
+        ? props.selectedModel.pathModifiedFile
+        : props.selectedModel.pathFile;
+
+      const onLoad = (gltf) => {
+        // Get scene
+        const scene = gltf.scene || gltf.scenes[0];
+        // En caso de que no exista una escena
+        if (gltf.scenes.length !== 1 || !scene) {
+          throw new Error("Debe existir una escena con un único objeto.");
         }
+        // En caso de que sí la exista
+        setContent(scene);
+      };
+
+      const whileLoadingModel = (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      };
+
+      const onError = (error) => {
+        console.log("An error happened" + error);
+      };
+
+      loader.load(
+        modelURL, // URL del modelo seleccionado
+        onLoad, // LLamada cuando se termina de cargar el objeto
+        whileLoadingModel, // Llamada cuando está siendo cargado
+        onError
       );
+    }
   };
 
   const clear = () => {
@@ -188,8 +182,7 @@ export function RenderBox(props) {
   // componentDidMount componentDidUpdate
   useEffect(() => {
     // Eliminamos el anterior
-    if (canvasRef.current.children[0] !== undefined)
-      canvasRef.current.removeChild(canvasRef.current.children[0]);
+    clear();
 
     // Render
     canvasRef.current.appendChild(renderer.domElement);
@@ -207,9 +200,6 @@ export function RenderBox(props) {
     // Animar
     animateFrame();
   }, [props.selectedModel]);
-
-  // Comenzar renderizado
-  requestAnimationFrame(animateFrame);
 
   // Devolver componente
   return <div ref={canvasRef} />;

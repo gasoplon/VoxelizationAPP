@@ -43,6 +43,18 @@ processed_dir = os.path.join(config['DIRECTORY_FILES_PROCESSED'])
 os.makedirs(processed_dir, exist_ok=True)
 processed_dir = os.path.join(config['DIRECTORY_FILES_BAKED_TEXTURES'])
 os.makedirs(processed_dir, exist_ok=True)
+processed_dir = os.path.join(config['DIRECTORY_MOSAICS_GENERATED'])
+os.makedirs(processed_dir, exist_ok=True)
+
+if(config["REMOVE_DIRECTORIES"]):
+    for f in os.listdir(config['DIRECTORY_UPLOADED_FILE']):
+        os.remove(os.path.join(config['DIRECTORY_UPLOADED_FILE'], f))
+    for f in os.listdir(config['DIRECTORY_FILES_PROCESSED']):
+        os.remove(os.path.join(config['DIRECTORY_FILES_PROCESSED'], f))
+    for f in os.listdir(config['DIRECTORY_FILES_BAKED_TEXTURES']):
+        os.remove(os.path.join(config['DIRECTORY_FILES_BAKED_TEXTURES'], f))
+    for f in os.listdir(config['DIRECTORY_MOSAICS_GENERATED']):
+        os.remove(os.path.join(config['DIRECTORY_MOSAICS_GENERATED'], f))
 
 # Manejo de errores
 # TODO: Cambiar codigo de vuelta
@@ -68,7 +80,7 @@ app.register_error_handler(InvalidAPIParameterException, invalid_api_usage)
 #     return response, exc.code
 
 
-@app.route('/api/uploadFile', methods=['POST'])
+@ app.route('/api/uploadFile', methods=['POST'])
 def receive_file():
     # PARÁMETROS DE ENTRADA
     # ==============================================================

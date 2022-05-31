@@ -9,11 +9,13 @@ class DevelopmentConfig(Config):
 config = {
     # APP Config
     'DEVELOPMENT_CONFIG': DevelopmentConfig,
+    'REMOVE_DIRECTORIES': True,
     # Directories
     'DIRECTORY_UPLOADED_FILE': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesUploaded',
     'DIRECTORY_FILES_PROCESSED': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesProcessed',
     'DIRECTORY_FILES_BAKED_TEXTURES': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\bakedTextures',
     'DIRECTORY_MINECRAFT_TEXTURES': '..\\TEXTURAS_Y_MODELOS\\MINECRAFT_TEXTURES',
+    'DIRECTORY_MOSAICS_GENERATED': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\mosaics',
     # API Parameters
     'API_PARAM_MAIN_FILE': 'modelFile',
     'API_PARAM_ATTACHED_FILES': 'attachedFiles',
