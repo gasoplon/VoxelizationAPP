@@ -18,7 +18,9 @@ import time
 
 import math
 # Constantes
-BLENDER_COMMAND = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
+BLENDER_COMMAND_VOXELIZATION = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
+
+BLENDER_COMMAND_APPLY_TEXTURE = 'blender --background --factory-startup --python ./scripts/texture_aplying.py -- {} {}'
 
 # TimeStamp
 DEBUG_TIME = False
@@ -54,11 +56,10 @@ def checkFileUploaded(files):
 
 # METODOS DE VOXELIZACION
 def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
-    formatted_command = BLENDER_COMMAND.format(
+    formatted_command = BLENDER_COMMAND_VOXELIZATION.format(
         config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements, UUID, config['DIRECTORY_FILES_BAKED_TEXTURES'], config['BAKED_FILES_EXTENSION'])
     output = os.popen(formatted_command)
     out_str = output.read()
-    print(out_str)
     errors = findall("ERR_CODE: \d", out_str)
     polygons = eval(search("VERTICES_INI(.+)VERTICES_FIN", out_str).group(1))
     # logger.info(polygons)
@@ -70,6 +71,7 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
     return polygons
 
 
+# GENERACIÓN DE MOISACO
 def Mosaic(polygons, UUID):
     # start = time.time()
     # Configuracion
@@ -133,9 +135,18 @@ def Mosaic(polygons, UUID):
                    int((1.0 - p[0][1]) * total_large))
         mosaic_img.paste(tiles[closest[1]], sup_izq)
 
-    mosaic_img.save("mosaic_img.jpg")
+    mosaic_img.save(
+        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpg")
 
     # end = time.time()
     # print("TIME: " + str(end-start))
 
+
+# APLICAICÓN DE TEXTURA GENERADA
+def applyTexture(fileName, UUID):
+    formatted_command = BLENDER_COMMAND_APPLY_TEXTURE.format(
+        config['DIRECTORY_FILES_PROCESSED'] + '/' + fileName,
+        UUID + ".jpg")
+    output = os.popen(formatted_command)
+    logger.error(output.read())
     pass

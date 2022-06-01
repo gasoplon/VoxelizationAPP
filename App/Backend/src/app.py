@@ -125,6 +125,7 @@ def receive_file():
     file = checkFileUploaded(request.files)
     # ==============================================================
     # Guardar archivo y voxelizar figura
+    returned_file_name = None
     if file:
         ext = file.filename.split('.')[1]
         new_UUID = str(uuid.uuid1())
@@ -135,15 +136,19 @@ def receive_file():
         polygons = Voxelization(new_UUID, file_name, resolution,
                                 removeDisconnectedElements)
 
-        Mosaic(polygons, str(new_UUID))
+        returned_file_name = new_UUID + "." + \
+            config["RETURNED_ALLOW_FILE_EXTENSION"]
 
-    # TODO: Minecraft Command.......
+        Mosaic(polygons, new_UUID)
+
+        # TODO: Minecraft Command.......
+
+        applyTexture(returned_file_name, new_UUID)
 
     # TODO: Send OK, archivo, comando...
-    response = jsonify({'Status': 'Ok'})
+    # response = jsonify({'Status': 'Ok'})
     # TODO: CODIGOS DE ERROR
-    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=new_UUID + "." +
-                               config["RETURNED_ALLOW_FILE_EXTENSION"], as_attachment=True)
+    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=returned_file_name, as_attachment=True)
 
 
 if __name__ == '__main__':
