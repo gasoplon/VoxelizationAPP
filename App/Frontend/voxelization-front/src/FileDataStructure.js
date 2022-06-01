@@ -2,24 +2,24 @@ import * as Constants from "./constants.js";
 import { v4 as uuidv4 } from "uuid";
 
 export class FilesStructure {
-  #demos;
+  demos;
   fileUploaded;
 
   constructor(fileUploaded = undefined) {
-    this.#demos = DEMOS;
+    this.demos = DEMOS;
     this.fileUploaded = fileUploaded;
   }
 
   // GETTERS
   get demosFilesIDs() {
     var keys;
-    this.#demos ? (keys = Object.keys(this.#demos)) : (keys = []);
+    this.demos ? (keys = Object.keys(this.demos)) : (keys = []);
     return keys;
   }
 
   // METODOS
   getFileByID(ID) {
-    var file = this.#demos[ID];
+    var file = this.demos[ID];
     if (!file && this.fileUploaded && this.fileUploaded.id === ID)
       file = this.fileUploaded;
     else if (!file && this.fileUploaded)
@@ -29,6 +29,12 @@ export class FilesStructure {
 
   addUploadedFile(newDataStructure) {
     this.fileUploaded = newDataStructure;
+  }
+
+  addModifiedFile(ID, pathModifiedFile) {
+    let f = this.getFileByID(ID);
+    if (f.pathModifiedFile) URL.revokeObjectURL(f.pathModifiedFile);
+    f.pathModifiedFile = URL.createObjectURL(pathModifiedFile);
   }
 
   removeFileByID(ID) {
@@ -71,6 +77,10 @@ export class SingleFileDataStructure {
   async _getBlobByURL(URL) {
     const data = await fetch(URL);
     return await data.blob();
+  }
+
+  clone() {
+    return new SingleFileDataStructure(this.fullNameFile);
   }
 }
 

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response, send_file
 from config import config
 from utils import *
 from Exceptions import *
@@ -127,8 +127,8 @@ def receive_file():
     # Guardar archivo y voxelizar figura
     if file:
         ext = file.filename.split('.')[1]
-        new_UUID = uuid.uuid1()
-        file_name = str(new_UUID) + '.' + ext
+        new_UUID = str(uuid.uuid1())
+        file_name = new_UUID + '.' + ext
         file.save(os.path.join(uploads_dir, file_name))
 
         # Voxelization with textures Algorithm and Mosaic generation
@@ -140,10 +140,10 @@ def receive_file():
     # TODO: Minecraft Command.......
 
     # TODO: Send OK, archivo, comando...
-    response = jsonify({'message': 'Ok'})
-    # return response
+    response = jsonify({'Status': 'Ok'})
     # TODO: CODIGOS DE ERROR
-    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=file_name, as_attachment=True)
+    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=new_UUID + "." +
+                               config["RETURNED_ALLOW_FILE_EXTENSION"], as_attachment=True)
 
 
 if __name__ == '__main__':

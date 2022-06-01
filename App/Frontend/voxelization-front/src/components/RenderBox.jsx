@@ -19,9 +19,9 @@ import PropTypes from "prop-types";
 Cache.enabled = true;
 
 export function RenderBox(props) {
+  const { selectedURLFile } = props;
   // Componentes del RenderBox
   const canvasRef = createRef(); // Crea la refencia para instanciar el render en un DIV
-  const loader = new GLTFLoader(); // Loader
   const scene = new Scene(); // Escena
   const renderer = new WebGLRenderer({ antialias: true }); // Render
   const camera = new PerspectiveCamera( // Camara
@@ -101,14 +101,8 @@ export function RenderBox(props) {
   window.addEventListener("resize", resize, false);
 
   const loadObject = () => {
-    if (
-      props.selectedModel &&
-      (props.selectedModel.pathFile || props.selectedModel.pathModifiedFile)
-    ) {
-      const modelURL = props.selectedModel.pathModifiedFile
-        ? props.selectedModel.pathModifiedFile
-        : props.selectedModel.pathFile;
-
+    const loader = new GLTFLoader(); // Loader
+    if (selectedURLFile) {
       const onLoad = (gltf) => {
         // Get scene
         const scene = gltf.scene || gltf.scenes[0];
@@ -129,7 +123,7 @@ export function RenderBox(props) {
       };
 
       loader.load(
-        modelURL, // URL del modelo seleccionado
+        selectedURLFile, // URL del modelo seleccionado
         onLoad, // LLamada cuando se termina de cargar el objeto
         whileLoadingModel, // Llamada cuando está siendo cargado
         onError
@@ -199,7 +193,7 @@ export function RenderBox(props) {
     // console.log(scene);
     // Animar
     animateFrame();
-  }, [props.selectedModel]);
+  }, [selectedURLFile]);
 
   // Devolver componente
   return <div ref={canvasRef} />;

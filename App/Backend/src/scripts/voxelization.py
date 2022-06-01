@@ -262,5 +262,5 @@ if(APPLY_MODIFIERS["exportUVs"]):
 deselectAllObjects()
 select_one_object(remeshed_object)
 bpy.ops.export_scene.gltf(
-    filepath=obj_out, export_format='GLB', use_selection=True, export_materials='EXPORT', export_apply=True)
+    filepath=obj_out, export_format='GLTF_EMBEDDED', use_selection=True, export_materials='EXPORT', export_apply=True)
 ##################################################################################################################

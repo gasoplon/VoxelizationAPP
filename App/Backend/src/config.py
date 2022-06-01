@@ -12,7 +12,7 @@ config = {
     'REMOVE_DIRECTORIES': True,
     # Directories
     'DIRECTORY_UPLOADED_FILE': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesUploaded',
-    'DIRECTORY_FILES_PROCESSED': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesProcessed',
+    'DIRECTORY_FILES_PROCESSED': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\filesProcessed\\',
     'DIRECTORY_FILES_BAKED_TEXTURES': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\bakedTextures',
     'DIRECTORY_MINECRAFT_TEXTURES': '..\\TEXTURAS_Y_MODELOS\\MINECRAFT_TEXTURES',
     'DIRECTORY_MOSAICS_GENERATED': '..\\TEXTURAS_Y_MODELOS\\API_FILES\\mosaics',
@@ -23,6 +23,7 @@ config = {
     'API_PARAM_USE_REMOVE_DISCONNECTED': 'useRemoveDisconnected',
     # Allowed Extensions Model File
     'ALLOWED_EXTENSIONS_MODEL_FILE': ['glb'],
+    'RETURNED_ALLOW_FILE_EXTENSION': 'gltf',
     'BAKED_FILES_EXTENSION': '.png',
     # Resolution gange
     'RESOLUTION_RANGE_ALLOWED': range(1, 24),

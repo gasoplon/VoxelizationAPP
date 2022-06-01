@@ -12,57 +12,45 @@ import * as Constants from "../constants.js";
 import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
 import ListItem from "@mui/material/ListItem";
-import {
-  FilesStructure,
-  SingleFileDataStructure,
-} from "../FileDataStructure.js";
 
 export default function SelectedListItem(props) {
   // ------------------- ESTADOS -----------------------------------------
-  // Estado con la estructura de datos para los archivos
-  const [filesUploadedItems, setFilesUploadedItems] = React.useState(
-    new FilesStructure()
-  );
-  // Archivo seleccionado actualmente
-  const [selectedIDFile, setSelectedIDFile] = React.useState();
-  useEffect(() => {
-    // Inicializar estado
-    var demosIDs = filesUploadedItems.demosFilesIDs;
-    if (demosIDs && !filesUploadedItems.fileUploaded) {
-      var key = demosIDs[0];
-      setSelectedIDFile(key);
-      props.handleSelectedFileChange(filesUploadedItems.getFileByID(key));
-    }
-  }, [filesUploadedItems]);
-
+  const {
+    filesDataStructure,
+    selectedIDFile,
+    handleListItemClickProps,
+    resetOptions,
+    handleUploadFile,
+  } = props;
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
-    props.resetOptions();
-    setSelectedIDFile(id);
-    props.handleSelectedFileChange(filesUploadedItems.getFileByID(id));
-  };
-  const handleDelete = (event, id) => {
-    var copy = filesUploadedItems.clone();
-    copy.removeFileByID(id);
-    document.getElementById("contained-button-file").value = null;
-    setFilesUploadedItems(copy);
-  };
-  const handleFileUploaded = (event) => {
-    var file_name = event.target.files[0].name;
-    var newFile = new SingleFileDataStructure(file_name, event.target.files[0]);
-    addFileStructureToState(newFile);
+    resetOptions();
+    handleListItemClickProps(event, id);
   };
 
+  // const handleDelete = (event, id) => {
+  //   var copy = filesUploadedItems.clone();
+  //   copy.removeFileByID(id);
+  //   document.getElementById("contained-button-file").value = null;
+  //   setFilesUploadedItems(copy);
+  // };
+
+  // const handleFileUploaded = (event) => {
+  //   var file_name = event.target.files[0].name;
+  //   var newFile = new SingleFileDataStructure(file_name, event.target.files[0]);
+  //   addFileStructureToState(newFile);
+  // };
+
   // ------------------- FUNCIONES AUXILIARES -----------------------------------------
-  function addFileStructureToState(newDataStructure) {
-    var copy = filesUploadedItems.clone();
-    copy.addUploadedFile(newDataStructure);
-    setFilesUploadedItems(copy);
-  }
+  // function addFileStructureToState(newDataStructure) {
+  //   var copy = filesUploadedItems.clone();
+  //   copy.addUploadedFile(newDataStructure);
+  //   setFilesUploadedItems(copy);
+  // }
 
   // ------------------- ITEMS -----------------------------------------
   const DemosListItems = () => {
-    var filesIDs = filesUploadedItems.demosFilesIDs;
+    var filesIDs = filesDataStructure.demosFilesIDs;
     var items = [];
     if (filesIDs) {
       filesIDs.forEach((demoID) => {
@@ -73,7 +61,7 @@ export default function SelectedListItem(props) {
             onClick={(event) => handleListItemClick(event, demoID)}
           >
             <ListItemText
-              primary={filesUploadedItems.getFileByID(demoID).fileName}
+              primary={filesDataStructure.getFileByID(demoID).fileName}
             />
           </ListItemButton>
         );
@@ -83,14 +71,14 @@ export default function SelectedListItem(props) {
   };
 
   const UploadedFileItem = () => {
-    var file = filesUploadedItems.fileUploaded;
+    var file = filesDataStructure.fileUploaded;
     var item;
     if (file) {
       item = (
         <ListItemButton
           key={file.id}
           selected={selectedIDFile === file.id}
-          onClick={(event) => handleListItemClick(event, file.id)}
+          // onClick={(event) => handleListItemClick(event, file.id)}
         >
           <ListItemText primary={file.fileName} />
 
@@ -98,7 +86,7 @@ export default function SelectedListItem(props) {
             <IconButton
               edge="end"
               aria-label="delete"
-              onClick={(event) => handleDelete(event, file.id)}
+              // onClick={(event) => handleDelete(event, file.id)}
             >
               <DeleteIcon />
             </IconButton>
@@ -134,10 +122,10 @@ export default function SelectedListItem(props) {
         type="file"
         hidden
         id="contained-button-file"
-        onChange={(event) => handleFileUploaded(event, false)}
+        // onChange={(event) => handleFileUploaded(event, false)}
       />
       <label htmlFor="contained-button-file">
-        {!filesUploadedItems.fileUploaded && (
+        {!filesDataStructure.fileUploaded && (
           <Tooltip title="Upload new file">
             <Button
               sx={{ mt: 3, mb: 3 }}
@@ -152,7 +140,7 @@ export default function SelectedListItem(props) {
         )}
       </label>
       <Button
-        onClick={props.handleUploadFile}
+        onClick={handleUploadFile}
         variant="contained"
         color="primary"
         component="span"
@@ -163,8 +151,8 @@ export default function SelectedListItem(props) {
   );
 }
 
-SelectedListItem.propTypes = {
-  handleUploadFile: PropTypes.func.isRequired,
-  handleSelectedFileChange: PropTypes.func.isRequired,
-  resetOptions: PropTypes.func.isRequired,
-};
+// SelectedListItem.propTypes = {
+//   handleUploadFile: PropTypes.func.isRequired,
+//   handleSelectedFileChange: PropTypes.func.isRequired,
+//   resetOptions: PropTypes.func.isRequired,
+// };
