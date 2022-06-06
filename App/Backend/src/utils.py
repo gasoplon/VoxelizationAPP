@@ -140,8 +140,8 @@ def Mosaic(polygons, UUID):
         #         angle=angle)
 
         # Paste tile
-        sup_izq = (int(p[0][0] * total_large),
-                   math.ceil((1.0 - p[0][1]) * total_large))
+        sup_izq = (round(p[0][0] * total_large),
+                   round((1.0 - p[0][1]) * total_large))
         mosaic_img.paste(tiles[closest[1]], sup_izq)
 
     mosaic_img.save(

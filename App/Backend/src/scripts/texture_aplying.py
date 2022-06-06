@@ -26,34 +26,16 @@ obj = bpy.data.objects[0]
 materialtoBake = bpy.data.materials["MaterialBake"]
 materialtoBake.use_nodes = True
 
-texture_image = bpy.data.images.load(os.path.abspath(backedTexture))
 new_node = materialtoBake.node_tree.nodes.new('ShaderNodeTexImage')
+materialtoBake.node_tree.nodes["Image Texture"].interpolation = 'Closest'
+
+texture_image = bpy.data.images.load(os.path.abspath(backedTexture))
 new_node.image = texture_image
 BSDF_node = materialtoBake.node_tree.nodes["Principled BSDF"]
-# print(BSDF_node.inputs)
-# print(materialtoBake.node_tree.nodes[0])
-# print(materialtoBake.node_tree.nodes[1])
-# print(materialtoBake.node_tree.nodes[2])
+# BSDF_node.inputs["Specular"].default_value = 0.0
+materialtoBake.specular_intensity = 0.0
 materialtoBake.node_tree.links.new(
     new_node.outputs["Color"], BSDF_node.inputs["Base Color"])
-# print(materialtoBake.node_tree.nodes)
-# materialtoBake = bpy.data.materials.new(name="MaterialBake")
-# materialtoBake.use_nodes = True
-# obj.data.materials.append(materialtoBake)
-# texImage = obj.data.materials["MaterialBake"].node_tree.nodes.new(
-#     'ShaderNodeTexImage')
-
-# # texImage.image = bpy.ops.image.open(
-# #     filepath=model_file, relative_path=True)
-
-# p = os.path.abspath(backedTexture)
-# print("PATH:" + p)
-# texImage.image = bpy.data.images.load(p)
-# bsdf = materialtoBake.node_tree.nodes["Principled BSDF"]
-# materialtoBake.node_tree.links.new(
-#     bsdf.inputs['Base Color'], texImage.outputs['Color'])
-
-# ob = bpy.context.view_layer.objects.active
 
 bpy.ops.export_scene.gltf(
     filepath=model_file, export_format='GLTF_EMBEDDED', use_selection=True, export_materials='EXPORT')
