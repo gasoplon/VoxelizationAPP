@@ -89,7 +89,7 @@ def Mosaic(polygons, UUID):
     width, height = main_photo.size
 
     # Cálculo del nº de tiles necesarias en cada eje
-    tile_size = (polygons[0][1][0]-polygons[0][0][0])
+    tile_size = abs(polygons[1][1][0]-polygons[1][0][0])
     n_tiles = math.ceil(1.0 / tile_size)
     total_large = int(n_tiles * 16)
     mosaic_img = Image.new('RGB', (total_large, total_large))
@@ -146,7 +146,9 @@ def Mosaic(polygons, UUID):
 
     mosaic_img.save(
         config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)
-
+    # logger.error(polygons[10][0][0])
+    # logger.error(tile_size)
+    # logger.error(n_tiles)
     # end = time.time()
     # print("TIME: " + str(end-start))
 
