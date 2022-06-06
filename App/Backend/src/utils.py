@@ -145,7 +145,7 @@ def Mosaic(polygons, UUID):
         mosaic_img.paste(tiles[closest[1]], sup_izq)
 
     mosaic_img.save(
-        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", "JPEG")
+        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)
 
     # end = time.time()
     # print("TIME: " + str(end-start))
