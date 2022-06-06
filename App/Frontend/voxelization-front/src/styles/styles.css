@@ -1,0 +1,14 @@
+@import url('http://fonts.cdnfonts.com/css/cera-round-pro');
+@import url('http://fonts.cdnfonts.com/css/minecraft-4');
+
+* {
+    font-family: 'Cera Round Pro', sans-serif;
+}
+
+.titulo_app {
+    font-family: 'Minecraft', sans-serif;
+}
+
+.img-tutorial-1 {
+    content:url(./imgs/prueba.jpg);
+}
