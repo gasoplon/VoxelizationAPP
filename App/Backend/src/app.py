@@ -37,24 +37,24 @@ app = create_app(enviroment)
 # if not os.path.exists(config['DIRECTORY_UPLOADED_FILE']):
 #     os.makedirs(config['DIRECTORY_UPLOADED_FILE'])
 # TODO: Y si no existe el directorio?
-uploads_dir = os.path.join(config['DIRECTORY_UPLOADED_FILE'])
-os.makedirs(uploads_dir, exist_ok=True)
-processed_dir = os.path.join(config['DIRECTORY_FILES_PROCESSED'])
-os.makedirs(processed_dir, exist_ok=True)
-processed_dir = os.path.join(config['DIRECTORY_FILES_BAKED_TEXTURES'])
-os.makedirs(processed_dir, exist_ok=True)
-processed_dir = os.path.join(config['DIRECTORY_MOSAICS_GENERATED'])
-os.makedirs(processed_dir, exist_ok=True)
+os.makedirs(getAbsolutePath(config['DIRECTORY_UPLOADED_FILE']), exist_ok=True)
+os.makedirs(getAbsolutePath(
+    config['DIRECTORY_FILES_PROCESSED']), exist_ok=True)
+os.makedirs(getAbsolutePath(
+    config['DIRECTORY_FILES_BAKED_TEXTURES']), exist_ok=True)
+os.makedirs(getAbsolutePath(
+    config['DIRECTORY_MOSAICS_GENERATED']), exist_ok=True)
+
 
 if(config["REMOVE_DIRECTORIES"]):
     for f in os.listdir(config['DIRECTORY_UPLOADED_FILE']):
-        os.remove(os.path.join(config['DIRECTORY_UPLOADED_FILE'], f))
+        os.remove(getAbsolutePath(config['DIRECTORY_UPLOADED_FILE'], f))
     for f in os.listdir(config['DIRECTORY_FILES_PROCESSED']):
-        os.remove(os.path.join(config['DIRECTORY_FILES_PROCESSED'], f))
+        os.remove(getAbsolutePath(config['DIRECTORY_FILES_PROCESSED'], f))
     for f in os.listdir(config['DIRECTORY_FILES_BAKED_TEXTURES']):
-        os.remove(os.path.join(config['DIRECTORY_FILES_BAKED_TEXTURES'], f))
+        os.remove(getAbsolutePath(config['DIRECTORY_FILES_BAKED_TEXTURES'], f))
     for f in os.listdir(config['DIRECTORY_MOSAICS_GENERATED']):
-        os.remove(os.path.join(config['DIRECTORY_MOSAICS_GENERATED'], f))
+        os.remove(getAbsolutePath(config['DIRECTORY_MOSAICS_GENERATED'], f))
 
 # Manejo de errores
 # TODO: Cambiar codigo de vuelta
@@ -127,23 +127,28 @@ def receive_file():
     # Guardar archivo y voxelizar figura
     returned_file_name = None
     if file:
+        # Nombre y extension del archivo
         ext = file.filename.split('.')[1]
-        new_UUID = str(uuid.uuid1())
-        file_name = new_UUID + '.' + ext
-        file.save(os.path.join(uploads_dir, file_name))
+        UUID = str(uuid.uuid1())
+        file_name = UUID + '.' + ext
+
+        # Guardar en archivos subidos
+        path_save = getAbsolutePath(
+            config["DIRECTORY_UPLOADED_FILE"], file_name)
+        file.save(path_save)
 
         # Voxelization with textures Algorithm and Mosaic generation
-        polygons = Voxelization(new_UUID, file_name, resolution,
+        polygons = Voxelization(UUID, file_name, resolution,
                                 removeDisconnectedElements)
 
-        returned_file_name = new_UUID + "." + \
+        returned_file_name = UUID + "." + \
             config["RETURNED_ALLOW_FILE_EXTENSION"]
 
-        Mosaic(polygons, new_UUID)
+        Mosaic(polygons, UUID)
 
-        # TODO: Minecraft Command.......
+        # # TODO: Minecraft Command.......
 
-        applyTexture(returned_file_name, new_UUID)
+        applyTexture(returned_file_name, UUID)
 
     # TODO: Send OK, archivo, comando...
     # response = jsonify({'Status': 'Ok'})

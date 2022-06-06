@@ -69,6 +69,7 @@ start = None
 end = None
 
 # Importar escena
+print("PATH:" + obj_in)
 bpy.ops.import_scene.gltf(filepath=obj_in)
 
 # Get object

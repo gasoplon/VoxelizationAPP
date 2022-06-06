@@ -1,6 +1,6 @@
 import logging
 import os
-from statistics import mean
+
 # from mosaic_generation import *
 
 import ERROR_CODES
@@ -11,9 +11,6 @@ from re import *
 from PIL import Image
 from scipy import spatial
 import numpy as np
-import glob
-
-import time
 
 
 import math
@@ -56,8 +53,19 @@ def checkFileUploaded(files):
 
 # METODOS DE VOXELIZACION
 def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
+    path_model_file_in = os.path.join(
+        config['DIRECTORY_UPLOADED_FILE'], file_name)
+    path_model_file_out = os.path.join(
+        config['DIRECTORY_FILES_PROCESSED'], file_name)
     formatted_command = BLENDER_COMMAND_VOXELIZATION.format(
-        config['DIRECTORY_UPLOADED_FILE'] + '/' + file_name, config['DIRECTORY_FILES_PROCESSED'] + '/' + file_name, resolution, removeDisconnectedElements, UUID, config['DIRECTORY_FILES_BAKED_TEXTURES'], config['BAKED_FILES_EXTENSION'])
+        path_model_file_in,
+        path_model_file_out,
+        resolution,
+        removeDisconnectedElements,
+        UUID,
+        config['DIRECTORY_FILES_BAKED_TEXTURES'],
+        config['BAKED_FILES_EXTENSION'])
+
     output = os.popen(formatted_command)
     out_str = output.read()
     errors = findall("ERR_CODE: \d", out_str)
@@ -75,8 +83,9 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
 def Mosaic(polygons, UUID):
     # start = time.time()
     # Configuracion
-    main_photo = Image.open(
-        "..\\TEXTURAS_Y_MODELOS\\API_FILES\\bakedTextures\\" + UUID + ".png")
+    main_photo_path = getAbsolutePath(
+        config["DIRECTORY_FILES_BAKED_TEXTURES"], UUID + ".png")
+    main_photo = Image.open(main_photo_path)
     width, height = main_photo.size
 
     # Cálculo del nº de tiles necesarias en cada eje
@@ -88,8 +97,8 @@ def Mosaic(polygons, UUID):
     # Lecturas de texturas de las tiles
     tiles = []
     for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
-        absolute_tile_path = str(
-            config['DIRECTORY_MINECRAFT_TEXTURES'] + '\\'+tile_path)
+        absolute_tile_path = getAbsolutePath(
+            config['DIRECTORY_MINECRAFT_TEXTURES'], tile_path)
         tile = Image.open(absolute_tile_path)
         tiles.append(tile)
 
@@ -132,11 +141,11 @@ def Mosaic(polygons, UUID):
 
         # Paste tile
         sup_izq = (int(p[0][0] * total_large),
-                   int((1.0 - p[0][1]) * total_large))
+                   math.ceil((1.0 - p[0][1]) * total_large))
         mosaic_img.paste(tiles[closest[1]], sup_izq)
 
     mosaic_img.save(
-        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpg")
+        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", "JPEG")
 
     # end = time.time()
     # print("TIME: " + str(end-start))
@@ -145,8 +154,14 @@ def Mosaic(polygons, UUID):
 # APLICAICÓN DE TEXTURA GENERADA
 def applyTexture(fileName, UUID):
     formatted_command = BLENDER_COMMAND_APPLY_TEXTURE.format(
-        config['DIRECTORY_FILES_PROCESSED'] + '/' + fileName,
-        UUID + ".jpg")
+        os.path.join(config['DIRECTORY_FILES_PROCESSED'], fileName),
+        os.path.join(config['DIRECTORY_MOSAICS_GENERATED'], UUID + ".jpeg"))
     output = os.popen(formatted_command)
     logger.error(output.read())
-    pass
+
+
+def getAbsolutePath(root, *args):
+    path = ""
+    for p in args:
+        path = os.path.join(path, p)
+    return os.path.abspath(os.path.join(root, path))
