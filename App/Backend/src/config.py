@@ -29,7 +29,7 @@ config = {
     'RETURNED_ALLOW_FILE_EXTENSION': 'gltf',
     'BAKED_FILES_EXTENSION': '.png',
     # Resolution gange
-    'RESOLUTION_RANGE_ALLOWED': range(1, 24),
+    'RESOLUTION_RANGE_ALLOWED': range(1, 8),
     # Use remove disconnected elements allowed values
     'USE_REMOVE_DISCONNECTED_ELEMENTS_ALLOWED': ['true', 'false'],
 }

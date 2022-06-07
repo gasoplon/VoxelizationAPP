@@ -27,7 +27,8 @@ export class FilesStructure {
     return file;
   }
 
-  addUploadedFile(newDataStructure) {
+  addUploadedFile(file_name, file) {
+    let newDataStructure = new SingleFileDataStructure(file_name, file);
     this.fileUploaded = newDataStructure;
   }
 

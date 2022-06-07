@@ -8,10 +8,7 @@ import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Typography from "@mui/material/Typography";
-import * as Constants from "../constants.js";
-import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
-import ListItem from "@mui/material/ListItem";
 
 export default function SelectedListItem(props) {
   // ------------------- ESTADOS -----------------------------------------
@@ -20,33 +17,14 @@ export default function SelectedListItem(props) {
     selectedIDFile,
     handleListItemClickProps,
     resetOptions,
-    handleUploadFile,
+    handleFileUploaded,
+    handleDelete,
   } = props;
   // ------------------- MANEJADORES -----------------------------------------
   const handleListItemClick = (event, id) => {
     resetOptions();
     handleListItemClickProps(event, id);
   };
-
-  // const handleDelete = (event, id) => {
-  //   var copy = filesUploadedItems.clone();
-  //   copy.removeFileByID(id);
-  //   document.getElementById("contained-button-file").value = null;
-  //   setFilesUploadedItems(copy);
-  // };
-
-  // const handleFileUploaded = (event) => {
-  //   var file_name = event.target.files[0].name;
-  //   var newFile = new SingleFileDataStructure(file_name, event.target.files[0]);
-  //   addFileStructureToState(newFile);
-  // };
-
-  // ------------------- FUNCIONES AUXILIARES -----------------------------------------
-  // function addFileStructureToState(newDataStructure) {
-  //   var copy = filesUploadedItems.clone();
-  //   copy.addUploadedFile(newDataStructure);
-  //   setFilesUploadedItems(copy);
-  // }
 
   // ------------------- ITEMS -----------------------------------------
   const DemosListItems = () => {
@@ -62,6 +40,7 @@ export default function SelectedListItem(props) {
           >
             <ListItemText
               primary={filesDataStructure.getFileByID(demoID).fileName}
+              class="texto_normal"
             />
           </ListItemButton>
         );
@@ -78,7 +57,7 @@ export default function SelectedListItem(props) {
         <ListItemButton
           key={file.id}
           selected={selectedIDFile === file.id}
-          // onClick={(event) => handleListItemClick(event, file.id)}
+          onClick={(event) => handleListItemClick(event, file.id)}
         >
           <ListItemText primary={file.fileName} />
 
@@ -86,7 +65,7 @@ export default function SelectedListItem(props) {
             <IconButton
               edge="end"
               aria-label="delete"
-              // onClick={(event) => handleDelete(event, file.id)}
+              onClick={(event) => handleDelete(event, file.id)}
             >
               <DeleteIcon />
             </IconButton>
@@ -99,60 +78,46 @@ export default function SelectedListItem(props) {
 
   // ------------------- RETURN -----------------------------------------
   return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 360,
-        bgcolor: "background.paper",
-        border: "1px solid #000",
-      }}
-    >
-      <List component="nav" aria-label="main mailbox folders">
-        <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
+    <Box>
+      <List component="nav">
+        <Typography sx={{ mt: 1, mb: 1 }} class="list_title" component="div">
           Demos
         </Typography>
         {DemosListItems()}
-        {/* <Divider /> */}
-        <Typography sx={{ mt: 1, mb: 1 }} variant="subtitle2" component="div">
-          Archivos
+        <Typography sx={{ mt: 1, mb: 1 }} class="list_title" component="div">
+          Archivo subido
         </Typography>
         {UploadedFileItem()}
       </List>
-      <input
-        type="file"
-        hidden
-        id="contained-button-file"
-        // onChange={(event) => handleFileUploaded(event, false)}
-      />
-      <label htmlFor="contained-button-file">
-        {!filesDataStructure.fileUploaded && (
-          <Tooltip title="Upload new file">
-            <Button
-              sx={{ mt: 3, mb: 3 }}
-              variant="outlined"
-              color="primary"
-              component="span"
-              startIcon={<AddCircleOutlineIcon />}
-            >
-              Añadir archivo
-            </Button>
-          </Tooltip>
-        )}
-      </label>
-      <Button
-        onClick={handleUploadFile}
-        variant="contained"
-        color="primary"
-        component="span"
-      >
-        Upload!
-      </Button>
+      <div class="row p-2">
+        <input
+          type="file"
+          hidden
+          id="contained-button-file"
+          onChange={(event) => handleFileUploaded(event, false)}
+        />
+        <label htmlFor="contained-button-file">
+          {!filesDataStructure.fileUploaded && (
+            <Tooltip title="Upload new file">
+              <Button
+                class="custom_button col-5 pt-2 pb-2 p-1 "
+                component="span"
+                startIcon={<AddCircleOutlineIcon />}
+              >
+                Añadir archivo
+              </Button>
+            </Tooltip>
+          )}
+        </label>
+      </div>
     </Box>
   );
 }
 
-// SelectedListItem.propTypes = {
+{
+  /* // SelectedListItem.propTypes = {
 //   handleUploadFile: PropTypes.func.isRequired,
 //   handleSelectedFileChange: PropTypes.func.isRequired,
 //   resetOptions: PropTypes.func.isRequired,
-// };
+// }; */
+}

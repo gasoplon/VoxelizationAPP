@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Slider, Checkbox, FormControlLabel, Box } from "@mui/material";
+import { Slider, FormControlLabel, Checkbox } from "@mui/material";
 import RenderBox from "./RenderBox";
 import * as Constants from "../constants.js";
 import SelectListObject from "./SelectListObject";
-import Alert from "@mui/material/Alert";
-import Stack from "@mui/material/Stack";
 import { Notifications } from "./Notifications";
-import {
-  FilesStructure,
-  SingleFileDataStructure,
-} from "../FileDataStructure.js";
+import Button from "@mui/material/Button";
+import { FiTool } from "react-icons/fi";
+import { FaInfoCircle } from "react-icons/fa";
+import { FilesStructure } from "../FileDataStructure.js";
+import { motion } from "framer-motion/dist/framer-motion";
 
 export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
@@ -96,6 +95,20 @@ export function RenderPanel() {
         });
     });
   };
+
+  const handleFileUploaded = (event) => {
+    var file_name = event.target.files[0].name;
+    let copyDataStrcuture = filesDataStructure.clone();
+    copyDataStrcuture.addUploadedFile(file_name, event.target.files[0]);
+    setFilesDataStructure(copyDataStrcuture);
+  };
+
+  const handleDelete = (event, id) => {
+    var copy = filesDataStructure.clone();
+    copy.removeFileByID(id);
+    document.getElementById("contained-button-file").value = null;
+    setFilesDataStructure(copy);
+  };
   // ------------------- FUNCIONES AUXILIARES ---------------------------------------
   const handleResetOptions = () => {
     setResolutionVoxel(Constants.DEFAULT_VOXELIZATION_RESOLUTION);
@@ -104,43 +117,93 @@ export function RenderPanel() {
 
   // ------------------- RETURN ---------------------------------------
   return (
-    <div
-      style={{ border: "1px solid black", margin: "5px", textAlign: "center" }}
-    >
+    <div class="container text-white">
       <Notifications></Notifications>
-      <RenderBox selectedURLFile={selectedURLFile}></RenderBox>
-      <h1>Componente de carga(Pruebas de Algoritmo)</h1>
-      <br />
-      <h3>Resolución:</h3>
-      <Box sx={{ width: "40%", margin: "auto" }}>
-        <Slider
-          value={resolutionVoxel}
-          aria-label="Default"
-          valueLabelDisplay="auto"
-          step={1}
-          onChange={handleResolutionChange}
-          marks
-          min={1}
-          max={20}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={useRemoveDisconnected}
-              onChange={handleUseRemoveDisconnected}
+      <motion.div
+        class="row m-5"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+      >
+        <RenderBox selectedURLFile={selectedURLFile}></RenderBox>
+      </motion.div>
+      <div class="row justify-content-center text-center">
+        <div class="row justify-content-center text-center">
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            class="col-md-4 panel p-3"
+          >
+            <h1 class="row pb-3">
+              <FiTool />
+            </h1>
+            <div class="row">
+              <h5 class="col-1">Resolución</h5>
+            </div>
+            <div class="row justify-content-center pb-3">
+              <div class="col-10">
+                <Slider
+                  value={resolutionVoxel}
+                  aria-label="Default"
+                  valueLabelDisplay="auto"
+                  step={1}
+                  onChange={handleResolutionChange}
+                  marks
+                  min={1}
+                  max={8}
+                />
+              </div>
+            </div>
+            <div class="row">
+              <h5 class="col-auto">Usar elementos inconexos</h5>
+            </div>
+            <div class="row justify-content-center pb-3">
+              <div class="col-10">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={useRemoveDisconnected}
+                      onChange={handleUseRemoveDisconnected}
+                    />
+                  }
+                  label="Elementos inconexos."
+                />
+              </div>
+            </div>
+          </motion.div>
+          <div class="col-1 p-3"></div>
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            class="col-md-4 panel p-3"
+          >
+            <SelectListObject
+              filesDataStructure={filesDataStructure}
+              selectedIDFile={selectedIDFile}
+              handleListItemClickProps={handleListItemClick}
+              resetOptions={handleResetOptions}
+              handleFileUploaded={handleFileUploaded}
+              handleDelete={handleDelete}
             />
-          }
-          label="Eliminar elementos inconexos."
-        />
-        <SelectListObject
-          filesDataStructure={filesDataStructure}
-          selectedIDFile={selectedIDFile}
-          handleUploadFile={onFileUpload}
-          // selectedFileModified={selectedFile}
-          handleListItemClickProps={handleListItemClick}
-          resetOptions={handleResetOptions}
-        />
-      </Box>
+          </motion.div>
+        </div>
+        <div class="row justify-content-center text-center pt-5 pb-2">
+          <Button
+            onClick={onFileUpload}
+            class="custom_button col-5 pt-2 pb-2 p-1 mb-5 "
+            component="span"
+          >
+            ¡Voxelizar!
+          </Button>
+        </div>
+      </div>
+      {/* 
+      <br />
+      
+      <Box>
+
+
+
+      </Box> */}
     </div>
   );
 }

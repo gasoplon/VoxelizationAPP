@@ -13,7 +13,6 @@ import {
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import PropTypes from "prop-types";
 // import { createBackground } from "three-vignette-background";
 
 Cache.enabled = true;
@@ -65,9 +64,14 @@ export function RenderBox(props) {
   camera.add(luz2);
   luz2.position.set(0.5, 0, 0.87);
   scene.background = new Color(configuracion.sceneBackgroundColor);
-  // renderer.physicallyCorrectLights = true;
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  // // renderer.physicallyCorrectLights = true;
+  // // renderer.setPixelRatio(window.devicePixelRatio);
+  // // console.log(window.devicePixelRatio);
+  // renderer.domElement.style.width = "100%";
+  // renderer.domElement.style.height = "100%";
+  // camera.aspect = canvasRef.clientWidth / canvasRef.clientHeight;
+  // console.log(renderer.domElement.clientWidth);
+  // // renderer.setSize(window.innerWidth, window.innerHeight);
   controls.screenSpacePanning = true;
 
   /****************************************************************************************** */
@@ -90,12 +94,16 @@ export function RenderBox(props) {
 
   // Resize de la pantalla actual
   const resize = () => {
-    // // Get size del elemento padre
-    // const { clientHeight, clientWidth } = this.parentElement;
-    // // Actualizar
-    // camera.aspect = clientWidth / clientHeight;
-    // camera.updateProjectionMatrix();
-    // renderer.setSize(clientWidth, clientHeight);
+    if (canvasRef.current != null) {
+      renderer.setSize(
+        canvasRef.current.clientWidth,
+        canvasRef.current.clientHeight
+      );
+      camera.aspect =
+        canvasRef.current.clientWidth / canvasRef.current.clientHeight;
+
+      camera.updateProjectionMatrix();
+    }
   };
 
   window.addEventListener("resize", resize, false);
@@ -180,7 +188,17 @@ export function RenderBox(props) {
 
     // Render
     canvasRef.current.appendChild(renderer.domElement);
+    renderer.setSize(
+      canvasRef.current.clientWidth,
+      canvasRef.current.clientHeight
+    );
+    camera.aspect =
+      canvasRef.current.clientWidth / canvasRef.current.clientHeight;
 
+    camera.updateProjectionMatrix();
+
+    // canvasRef.class = "shadow-sm";
+    // renderer.setSize(window.innerWidth, window.innerHeight);
     // Luz
     // const light = new HemisphereLight(0xffffbb, 0x080820, 1);
     // scene.add(light);
@@ -196,7 +214,7 @@ export function RenderBox(props) {
   }, [selectedURLFile]);
 
   // Devolver componente
-  return <div ref={canvasRef} />;
+  return <div ref={canvasRef} class="h-100" />;
 }
 
 // //TODO:

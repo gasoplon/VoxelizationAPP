@@ -1,8 +1,12 @@
 @import url('http://fonts.cdnfonts.com/css/cera-round-pro');
 @import url('http://fonts.cdnfonts.com/css/minecraft-4');
 
+:root {
+    --border-color-button: #183153;
+  }
+
 * {
-    font-family: 'Cera Round Pro', sans-serif;
+    font-family: 'Cera Round Pro', sans-serif!important;
 }
 
 .titulo_app {
@@ -10,5 +14,54 @@
 }
 
 .img-tutorial-1 {
-    content:url(./imgs/prueba.jpg);
+    content:url(./imgs/3D_2_VOXEL.jpg);
+}
+
+canvas {
+    border-radius: 10px;
+    border-style: solid;
+    box-shadow: 0 .5rem 1rem rgba(0,0,.15,.15)!important;
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background-color: #ffffff;
+    /* height: 1700px; */
+}
+
+.texto_normal {
+    color:#005555;
+    font-weight: 500;
+}
+
+.custom_button {
+    border-style: solid;
+    background-color: #ffd43b;
+    text-align: center;
+    box-shadow: 0 0.3em 0 currentColor;
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+    font-weight: 500;
+}
+
+.custom_button:hover {
+    background: #fab005;
+}
+
+.panel {
+    border-radius: 10px;
+    border-style: solid;
+    box-shadow: 0 .5rem 1rem rgba(0,0,.15,.15)!important;
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+}
+
+.list_title {
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+    font-weight: 900;
+    text-transform: uppercase;
 }
