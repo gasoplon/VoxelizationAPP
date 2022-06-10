@@ -154,7 +154,7 @@ export function RenderPanel() {
               </div>
             </div>
             <div class="row">
-              <h5 class="col-auto">Usar elementos inconexos</h5>
+              <h5 class="col-auto">Eliminar elementos inconexos</h5>
             </div>
             <div class="row justify-content-center pb-3">
               <div class="col-10">

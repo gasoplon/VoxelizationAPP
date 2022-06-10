@@ -1,8 +1,7 @@
 import bpy
 import sys
-import bmesh
+import numpy as np
 import time
-import glob
 # ////////////////////////  CTES  /////////////////////////////
 
 DESC_FORMAT = "ERR_CODE: {} - {}."  # Errores
@@ -241,12 +240,18 @@ VERTS_STR = ""
 if(APPLY_MODIFIERS["exportUVs"]):
     me = bpy.context.object.data
     uv_layer = me.uv_layers.active.data
+    verts_x = None
+    v0 = np.array([1, 0])
+    v0 = v0 / np.linalg.norm(v0)
     for poly in me.polygons:
+        verts_x = set()
+        new_poly = []
         min_x = 1.0
         min_y = 1.0
         max_x = 0.0
         max_y = 0.0
         for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            verts_x.add(uv_layer[loop_index].uv[0])
             if(uv_layer[loop_index].uv[0] < min_x):
                 min_x = uv_layer[loop_index].uv[0]
             if(uv_layer[loop_index].uv[1] < min_y):
@@ -255,9 +260,18 @@ if(APPLY_MODIFIERS["exportUVs"]):
                 max_x = uv_layer[loop_index].uv[0]
             if(uv_layer[loop_index].uv[1] > max_y):
                 max_y = uv_layer[loop_index].uv[1]
-        new_poly = "[[" + str(min_x) + ", " + str(max_y) + \
-            "],[" + str(max_x) + ", " + str(min_y) + "]],"
-        VERTS_STR += new_poly
+        # Cálculo del ángulo
+        angle = 0.0
+        new_poly.append([min_x, max_y])
+        new_poly.append([max_x, min_y])
+        if(len(verts_x) != 2):
+            v1 = np.array([new_poly[0][0], new_poly[0][1]])
+            v1 = v1 / np.linalg.norm(v1)
+            angle = np.degrees(np.arccos(np.dot(v0, v1)))
+        new_poly.append([angle])
+        # new_poly = "[[" + str(min_x) + ", " + str(max_y) + \
+        #     "],[" + str(max_x) + ", " + str(min_y) + "]],"
+        VERTS_STR += str(new_poly) + ","
     print("VERTICES_INI" + VERTS_STR + "VERTICES_FIN")
 
 deselectAllObjects()
