@@ -138,15 +138,15 @@ def receive_file():
         file.save(path_save)
 
         # Voxelization with textures Algorithm and Mosaic generation
-        polygons = Voxelization(UUID, file_name, resolution,
+        uvs_info = Voxelization(UUID, file_name, resolution,
                                 removeDisconnectedElements)
 
         returned_file_name = UUID + "." + \
             config["RETURNED_ALLOW_FILE_EXTENSION"]
 
-        Mosaic(polygons, UUID)
+        Mosaic(uvs_info, UUID)
 
-        # # TODO: Minecraft Command.......
+        # # # TODO: Minecraft Command.......
 
         applyTexture(returned_file_name, UUID)
 

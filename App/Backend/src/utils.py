@@ -9,8 +9,8 @@ from re import *
 from PIL import Image, ImageDraw
 from scipy import spatial
 import numpy as np
+import json
 import math
-
 # Constantes
 BLENDER_COMMAND_VOXELIZATION = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
 
@@ -65,82 +65,33 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
 
     output = os.popen(formatted_command)
     out_str = output.read()
-    errors = findall("ERR_CODE: \d", out_str)
     # logger.error(out_str)
-    polygons = eval(search("VERTICES_INI(.+)VERTICES_FIN", out_str).group(1))
-    # logger.info(polygons)
+    errors = findall("ERR_CODE: \d", out_str)
     logger.error(errors)
+    uvs_info = eval(search("UV_INFO(.+)UV_INFO", out_str).group(1))
+    # logger.info(polygons)
     for e in errors:
         if('1' in e):
             raise InvalidAPIParameterException(
                 ERROR_CODES.NO_SINGLE_ELEMENT_IN_FILE_ERROR_030)
-    return polygons
-
-
-def rotateImageByAngle(imageToRotate, angle):
-
-    h, w = imageToRotate.shape[0], imageToRotate.shape[1]
-
-    y_centre, x_centre = h//2, w//2
-
-    rotationMatrix = cv2.getRotationMatrix2D((y_centre, x_centre), angle, 1.0)
-
-    cos = np.abs(rotationMatrix[0][0])
-    sin = np.abs(rotationMatrix[0][1])
-
-    new_height = int((h * sin) + (w * cos))
-    new_width = int((h * cos) + (w * sin))
-
-    rotationMatrix[0][2] += (new_width/2) - x_centre
-    rotationMatrix[1][2] += (new_height/2) - y_centre
-
-    rot_img = cv2.warpAffine(
-        imageToRotate, rotationMatrix, (new_width, new_height))
-
-    return rot_img
-
-
-def pasteImg(img, img_overlay, x, y, alphaMask):
-    # Image ranges
-    y1, y2 = max(0, y), min(img.shape[0], y + img_overlay.shape[0])
-    x1, x2 = max(0, x), min(img.shape[1], x + img_overlay.shape[1])
-
-    # Overlay ranges
-    y1o, y2o = max(0, -y), min(img_overlay.shape[0], img.shape[0] - y)
-    x1o, x2o = max(0, -x), min(img_overlay.shape[1], img.shape[1] - x)
-
-    # Exit if nothing to do
-    if y1 >= y2 or x1 >= x2 or y1o >= y2o or x1o >= x2o:
-        return
-
-    # Blend overlay within the determined ranges
-    img_crop = img[y1:y2, x1:x2]
-    img_overlay_crop = img_overlay[y1o:y2o, x1o:x2o]
-    alpha = alphaMask[y1o:y2o, x1o:x2o, np.newaxis]
-    alpha_inv = 1.0 - alpha
-
-    img_crop[:] = alpha * img_overlay_crop + alpha_inv * img_crop
-    return img_crop
+    return uvs_info
 
 # GENERACIÓN DE MOISACO
 
 
-def Mosaic(polygons, UUID):
+def Mosaic(uvs_info, UUID):
     # start = time.time()
     # Configuracion
-    main_photo_path = getAbsolutePath(
-        config["DIRECTORY_FILES_BAKED_TEXTURES"], UUID + ".png")
-    main_photo = Image.open(main_photo_path)
-    width, height = main_photo.size
-    # Cálculo del nº de tiles necesarias en cada eje
-    tile_size = abs(polygons[1][1][0]-polygons[1][0][0])
-    n_tiles = math.ceil(1.0 / tile_size)
-    total_large = int(n_tiles * 16)
-    mosaic_img = Image.new('RGB', (total_large, total_large))
+    file = open("map_coords_mosaic.txt", "r")
+    tiles_textures = json.loads(file.read())
+    main_photo = Image.open(getAbsolutePath(
+        config["DIRECTORY_FILES_BAKED_TEXTURES"], UUID + ".png"))
+    h, w = main_photo.size
+    mosaic_size = int(math.sqrt(uvs_info["n_tiles"])) * 16
+    mosaic_img = Image.new('RGB', (mosaic_size, mosaic_size))
 
-    # Lecturas de texturas de las tiles
-    tiles = []
     colors = []
+    tiles = []
     for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
         absolute_tile_path = getAbsolutePath(
             config['DIRECTORY_MINECRAFT_TEXTURES'], tile_path)
@@ -151,37 +102,68 @@ def Mosaic(polygons, UUID):
         if(mean_color.shape and mean_color.shape[0] == 4):
             tiles.append(tile)
             colors.append(mean_color)
-
     tree = spatial.KDTree(colors)
-    for p in polygons:
-        # Get crop image (left, upper, right, lower)
-        # logger.error(p[2])
-        A = [p[0][0] * width, (1.0 - p[0][1]) * height]
-        B = [p[1][0] * width, (1.0 - p[1][1]) * height]
-        crop_img = main_photo.crop((A[0], A[1], B[0], B[1]))
 
-        # Media de color
+    tile_size = uvs_info["wh_size"]
+    verts = uvs_info["verts"]
+    for v in verts:
+        vv = (v[0] + tile_size, v[1] + tile_size)
+        v0 = (v[0] * h, (1.0 - v[1]) * w)
+        v1 = (vv[0] * h, (1.0 - vv[1]) * w)
+        crop_img = main_photo.crop((v0[0], v0[1], v1[0], v1[1]))
         mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
         closest = tree.query(mean_color)
-        ####################################################################
-        # Aplicar rotación
-        ang = p[2][0]
-        if(ang != 0.0):
-            p2 = Image.fromarray(rotateImageByAngle(
-                np.array(tiles[closest[1]]), ang))
-            # mosaic_img_array = np.array(mosaic_img)
-            # img = pasteImg(mosaic_img_array[:, :, :3].copy(), crop_img_rotated[:, :, :3],
-            #                int(A[0]), int(A[1]), crop_img_rotated[:, :, 3] / 255.0)
-            # mosaic_img =
-            sup_izq = (round(p[0][0] * total_large),
-                       round((1.0 - p[0][1]) * total_large))
-            mosaic_img.paste(p2, sup_izq)
-        else:
-            ####################################################################
-            # Paste tile
-            sup_izq = (round(p[0][0] * total_large),
-                       round((1.0 - p[0][1]) * total_large))
-            mosaic_img.paste(tiles[closest[1]], sup_izq)
+        p_x = int(v[0] * mosaic_size)
+        # if(p_x % 16 != 0):
+        #     p_x = p_x - 1
+        v_paste = (p_x, int((1.0 - v[1]) * mosaic_size))
+        mosaic_img.paste(tiles[closest[1]], v_paste)
+    mosaic_img.save(
+        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)
+    # Lecturas de texturas de las tiles
+    # tiles = []
+    # colors = []
+    # for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
+    #     absolute_tile_path = getAbsolutePath(
+    #         config['DIRECTORY_MINECRAFT_TEXTURES'], tile_path)
+    #     tile = Image.open(absolute_tile_path)
+    #     if(tile.mode == "RGB"):
+    #         tile = tile.convert('RGBA')
+    #     mean_color = np.array(tile).mean(axis=0).mean(axis=0)
+    #     if(mean_color.shape and mean_color.shape[0] == 4):
+    #         tiles.append(tile)
+    #         colors.append(mean_color)
+
+    # tree = spatial.KDTree(colors)
+    # for p in polygons:
+    #     # Get crop image (left, upper, right, lower)
+    #     # logger.error(p[2])
+    #     A = [p[0][0] * width, (1.0 - p[0][1]) * height]
+    #     B = [p[1][0] * width, (1.0 - p[1][1]) * height]
+    #     crop_img = main_photo.crop((A[0], A[1], B[0], B[1]))
+
+    #     # Media de color
+    #     mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
+    #     closest = tree.query(mean_color)
+    #     ####################################################################
+    #     # Aplicar rotación
+    #     ang = p[2][0]
+    #     if(ang != 0.0):
+    #         p2 = Image.fromarray(rotateImageByAngle(
+    #             np.array(tiles[closest[1]]), ang))
+    #         # mosaic_img_array = np.array(mosaic_img)
+    #         # img = pasteImg(mosaic_img_array[:, :, :3].copy(), crop_img_rotated[:, :, :3],
+    #         #                int(A[0]), int(A[1]), crop_img_rotated[:, :, 3] / 255.0)
+    #         # mosaic_img =
+    #         sup_izq = (round(p[0][0] * total_large),
+    #                    round((1.0 - p[0][1]) * total_large))
+    #         mosaic_img.paste(p2, sup_izq)
+    #     else:
+    #         ####################################################################
+    #         # Paste tile
+    #         sup_izq = (round(p[0][0] * total_large),
+    #                    round((1.0 - p[0][1]) * total_large))
+    #         mosaic_img.paste(tiles[closest[1]], sup_izq)
 
     mosaic_img.save(
         config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)

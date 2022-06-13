@@ -2,6 +2,8 @@ import bpy
 import sys
 import numpy as np
 import time
+import math
+import json
 # ////////////////////////  CTES  /////////////////////////////
 
 DESC_FORMAT = "ERR_CODE: {} - {}."  # Errores
@@ -11,16 +13,16 @@ ERROR_NOT_ONE_ELEMENT_ON_SCENE = {
 OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 
 # Conf
-UV_IMAGE_RESOLUTION = 1024
+UV_IMAGE_RESOLUTION = 1000
 ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
-    "triToQuad": False,
     "generateUVs": True,
-    "exportUVs": True,
     "extrude": True,
     "bake": True,
 }
+# EXPORT UVs
+UVS_INFO = ""
 
 # TIMES
 TIMES_STR = "\n########## TIMES ##########\n"
@@ -130,20 +132,6 @@ if(APPLY_MODIFIERS["remesh"]):
         end = time.time()
         TIMES_STR += "Remesh Time:\t" + str(end-start) + "\n"
 
-if(APPLY_MODIFIERS["triToQuad"]):
-    if(DEBUG_TIME):
-        start = time.time()
-    # Select object to export
-    deselectAllObjects()
-    select_one_object(remeshed_object)
-    # Remove triangles UVs
-    bpy.ops.object.editmode_toggle()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.tris_convert_to_quads()
-    bpy.ops.object.editmode_toggle()
-    if(DEBUG_TIME):
-        end = time.time()
-        TIMES_STR += "Tri2Quad Time:\t" + str(end-start) + "\n"
 
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):
@@ -156,16 +144,33 @@ if(APPLY_MODIFIERS["generateUVs"]):
         lm = remeshed_object.data.uv_layers.new(name="LightMap")
     lm.active = True
     bpy.ops.mesh.uv_texture_remove()
-    bpy.ops.object.editmode_toggle()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.uv.smart_project(angle_limit=ANGLE_LIMIT)
-
-    # remeshed_object.data.uv_layers[0].active = True
-    # o = remeshed_object.data.uv_layers.active.data[0].uv
-    # print(type(o))
-    # print(o)
-    bpy.ops.object.editmode_toggle()
-    remeshed_object.select_set(False)
+    new_uv = remeshed_object.data.uv_layers.new(name='NewUV')
+    n_tiles = len(remeshed_object.data.loops) / 4
+    max_rows = math.ceil(math.sqrt(n_tiles))
+    tam = 1.0 / max_rows
+    new_dict = {'n_tiles': n_tiles, 'wh_size': tam}
+    verts = []
+    col = 0
+    row = 0
+    vert = (0.0, 0.0)
+    for loop in remeshed_object.data.loops:
+        if(loop.index % 4 == 0):
+            verts.append(vert)
+            new_uv.data[loop.index].uv = vert
+        elif loop.index % 4 == 1:
+            new_uv.data[loop.index].uv = (vert[0] + tam, vert[1])
+        elif loop.index % 4 == 2:
+            new_uv.data[loop.index].uv = (vert[0] + tam, vert[1] + tam)
+        elif loop.index % 4 == 3:
+            row += 1
+            vert = (col * tam, row * tam)
+            new_uv.data[loop.index].uv = vert
+        if(row == max_rows):
+            row = 0
+            col += 1
+            vert = (col * tam, 0)
+    new_dict['verts'] = verts
+    print("UV_INFO" + json.dumps(new_dict) + "UV_INFO")
     if(DEBUG_TIME):
         end = time.time()
         TIMES_STR += "Generate UVs Time:\t" + str(end-start) + "\n"
@@ -232,47 +237,6 @@ if(APPLY_MODIFIERS["bake"]):
 
 if(DEBUG_TIME):
     print(TIMES_STR + TIMES_STR_FIN)
-
-# Export objects
-select_one_object(remeshed_object)
-VERTS_STR = ""
-
-if(APPLY_MODIFIERS["exportUVs"]):
-    me = bpy.context.object.data
-    uv_layer = me.uv_layers.active.data
-    verts_x = None
-    v0 = np.array([1, 0])
-    v0 = v0 / np.linalg.norm(v0)
-    for poly in me.polygons:
-        verts_x = set()
-        new_poly = []
-        min_x = 1.0
-        min_y = 1.0
-        max_x = 0.0
-        max_y = 0.0
-        for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
-            verts_x.add(uv_layer[loop_index].uv[0])
-            if(uv_layer[loop_index].uv[0] < min_x):
-                min_x = uv_layer[loop_index].uv[0]
-            if(uv_layer[loop_index].uv[1] < min_y):
-                min_y = uv_layer[loop_index].uv[1]
-            if(uv_layer[loop_index].uv[0] > max_x):
-                max_x = uv_layer[loop_index].uv[0]
-            if(uv_layer[loop_index].uv[1] > max_y):
-                max_y = uv_layer[loop_index].uv[1]
-        # Cálculo del ángulo
-        angle = 0.0
-        new_poly.append([min_x, max_y])
-        new_poly.append([max_x, min_y])
-        if(len(verts_x) != 2):
-            v1 = np.array([new_poly[0][0], new_poly[0][1]])
-            v1 = v1 / np.linalg.norm(v1)
-            angle = np.degrees(np.arccos(np.dot(v0, v1)))
-        new_poly.append([angle])
-        # new_poly = "[[" + str(min_x) + ", " + str(max_y) + \
-        #     "],[" + str(max_x) + ", " + str(min_y) + "]],"
-        VERTS_STR += str(new_poly) + ","
-    print("VERTICES_INI" + VERTS_STR + "VERTICES_FIN")
 
 deselectAllObjects()
 select_one_object(remeshed_object)
