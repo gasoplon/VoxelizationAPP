@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response, send_file
 from config import config
 from utils import *
 from Exceptions import *
@@ -37,12 +37,24 @@ app = create_app(enviroment)
 # if not os.path.exists(config['DIRECTORY_UPLOADED_FILE']):
 #     os.makedirs(config['DIRECTORY_UPLOADED_FILE'])
 # TODO: Y si no existe el directorio?
-uploads_dir = os.path.join(config['DIRECTORY_UPLOADED_FILE'])
-os.makedirs(uploads_dir, exist_ok=True)
-processed_dir = os.path.join(config['DIRECTORY_FILES_PROCESSED'])
-os.makedirs(processed_dir, exist_ok=True)
-processed_dir = os.path.join(config['DIRECTORY_FILES_BAKED_TEXTURES'])
-os.makedirs(processed_dir, exist_ok=True)
+os.makedirs(getAbsolutePath(config['DIRECTORY_UPLOADED_FILE']), exist_ok=True)
+os.makedirs(getAbsolutePath(
+    config['DIRECTORY_FILES_PROCESSED']), exist_ok=True)
+os.makedirs(getAbsolutePath(
+    config['DIRECTORY_FILES_BAKED_TEXTURES']), exist_ok=True)
+os.makedirs(getAbsolutePath(
+    config['DIRECTORY_MOSAICS_GENERATED']), exist_ok=True)
+
+
+if(config["REMOVE_DIRECTORIES"]):
+    for f in os.listdir(config['DIRECTORY_UPLOADED_FILE']):
+        os.remove(getAbsolutePath(config['DIRECTORY_UPLOADED_FILE'], f))
+    for f in os.listdir(config['DIRECTORY_FILES_PROCESSED']):
+        os.remove(getAbsolutePath(config['DIRECTORY_FILES_PROCESSED'], f))
+    for f in os.listdir(config['DIRECTORY_FILES_BAKED_TEXTURES']):
+        os.remove(getAbsolutePath(config['DIRECTORY_FILES_BAKED_TEXTURES'], f))
+    for f in os.listdir(config['DIRECTORY_MOSAICS_GENERATED']):
+        os.remove(getAbsolutePath(config['DIRECTORY_MOSAICS_GENERATED'], f))
 
 # Manejo de errores
 # TODO: Cambiar codigo de vuelta
@@ -68,7 +80,7 @@ app.register_error_handler(InvalidAPIParameterException, invalid_api_usage)
 #     return response, exc.code
 
 
-@app.route('/api/uploadFile', methods=['POST'])
+@ app.route('/api/uploadFile', methods=['POST'])
 def receive_file():
     # PARÁMETROS DE ENTRADA
     # ==============================================================
@@ -80,7 +92,6 @@ def receive_file():
     # Usar eliminar elementos inconexos
     try:
         removeDisconnectedElements = request.form[config['API_PARAM_USE_REMOVE_DISCONNECTED']]
-        print(removeDisconnectedElements)
     except KeyError as e:
         removeDisconnectedElements = None
 
@@ -114,26 +125,35 @@ def receive_file():
     file = checkFileUploaded(request.files)
     # ==============================================================
     # Guardar archivo y voxelizar figura
+    returned_file_name = None
     if file:
+        # Nombre y extension del archivo
         ext = file.filename.split('.')[1]
-        new_UUID = uuid.uuid1()
-        file_name = str(new_UUID) + '.' + ext
-        file.save(os.path.join(uploads_dir, file_name))
+        UUID = str(uuid.uuid1())
+        file_name = UUID + '.' + ext
 
-        # Voxelization with textures Algorithm
-        Voxelization(new_UUID, file_name, resolution,
-                     removeDisconnectedElements)
+        # Guardar en archivos subidos
+        path_save = getAbsolutePath(
+            config["DIRECTORY_UPLOADED_FILE"], file_name)
+        file.save(path_save)
 
-        # TODO: Mosaico
-        MinecraftTexturing(new_UUID)
+        # Voxelization with textures Algorithm and Mosaic generation
+        uvs_info = Voxelization(UUID, file_name, resolution,
+                                removeDisconnectedElements)
 
-    # TODO: Minecraft Command.......
+        returned_file_name = UUID + "." + \
+            config["RETURNED_ALLOW_FILE_EXTENSION"]
+
+        Mosaic(uvs_info, UUID)
+
+        # # # TODO: Minecraft Command.......
+
+        applyTexture(returned_file_name, UUID)
 
     # TODO: Send OK, archivo, comando...
-    response = jsonify({'message': 'Ok'})
-    # return response
+    # response = jsonify({'Status': 'Ok'})
     # TODO: CODIGOS DE ERROR
-    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=file_name, as_attachment=True)
+    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=returned_file_name, as_attachment=True)
 
 
 if __name__ == '__main__':
