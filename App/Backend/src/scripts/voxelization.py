@@ -13,7 +13,7 @@ ERROR_NOT_ONE_ELEMENT_ON_SCENE = {
 OTHERS_OBJS = ['Camera', 'Cube', 'Light']  # Otros objetos de la escena
 
 # Conf
-UV_IMAGE_RESOLUTION = 1000
+UV_IMAGE_RESOLUTION = None
 ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
@@ -147,6 +147,7 @@ if(APPLY_MODIFIERS["generateUVs"]):
     new_uv = remeshed_object.data.uv_layers.new(name='NewUV')
     n_tiles = len(remeshed_object.data.loops) / 4
     max_rows = math.ceil(math.sqrt(n_tiles))
+    UV_IMAGE_RESOLUTION = max_rows * 16
     tam = 1.0 / max_rows
     new_dict = {'n_tiles': n_tiles, 'wh_size': tam}
     verts = []

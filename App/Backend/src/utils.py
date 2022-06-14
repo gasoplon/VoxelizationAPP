@@ -87,7 +87,7 @@ def Mosaic(uvs_info, UUID):
     main_photo = Image.open(getAbsolutePath(
         config["DIRECTORY_FILES_BAKED_TEXTURES"], UUID + ".png"))
     h, w = main_photo.size
-    mosaic_size = int(math.sqrt(uvs_info["n_tiles"])) * 16
+    mosaic_size = math.ceil(math.sqrt(uvs_info["n_tiles"])) * 16
     mosaic_img = Image.new('RGB', (mosaic_size, mosaic_size))
 
     colors = []
@@ -114,59 +114,26 @@ def Mosaic(uvs_info, UUID):
         mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
         closest = tree.query(mean_color)
         p_x = int(v[0] * mosaic_size)
-        # if(p_x % 16 != 0):
-        #     p_x = p_x - 1
-        v_paste = (p_x, int(v[1] * mosaic_size))
+        p_y = int(v[1] * mosaic_size)
+        if(p_x % 16 != 0):
+            p_x_0 = p_x - 1
+            p_x_1 = p_x + 1
+            if(p_x_0 % 16 == 0):
+                p_x = p_x_0
+            else:
+                p_x = p_x_1
+        if(p_y % 16 != 0):
+            p_y_0 = p_y - 1
+            p_y_1 = p_y + 1
+            if(p_y_0 % 16 == 0):
+                p_y = p_y_0
+            else:
+                p_y = p_y_1
+        v_paste = (p_x, p_y)
         mosaic_img.paste(tiles[closest[1]], v_paste)
-    mosaic_img.save(
-        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)
-    # Lecturas de texturas de las tiles
-    # tiles = []
-    # colors = []
-    # for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
-    #     absolute_tile_path = getAbsolutePath(
-    #         config['DIRECTORY_MINECRAFT_TEXTURES'], tile_path)
-    #     tile = Image.open(absolute_tile_path)
-    #     if(tile.mode == "RGB"):
-    #         tile = tile.convert('RGBA')
-    #     mean_color = np.array(tile).mean(axis=0).mean(axis=0)
-    #     if(mean_color.shape and mean_color.shape[0] == 4):
-    #         tiles.append(tile)
-    #         colors.append(mean_color)
-
-    # tree = spatial.KDTree(colors)
-    # for p in polygons:
-    #     # Get crop image (left, upper, right, lower)
-    #     # logger.error(p[2])
-    #     A = [p[0][0] * width, (1.0 - p[0][1]) * height]
-    #     B = [p[1][0] * width, (1.0 - p[1][1]) * height]
-    #     crop_img = main_photo.crop((A[0], A[1], B[0], B[1]))
-
-    #     # Media de color
-    #     mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
-    #     closest = tree.query(mean_color)
-    #     ####################################################################
-    #     # Aplicar rotación
-    #     ang = p[2][0]
-    #     if(ang != 0.0):
-    #         p2 = Image.fromarray(rotateImageByAngle(
-    #             np.array(tiles[closest[1]]), ang))
-    #         # mosaic_img_array = np.array(mosaic_img)
-    #         # img = pasteImg(mosaic_img_array[:, :, :3].copy(), crop_img_rotated[:, :, :3],
-    #         #                int(A[0]), int(A[1]), crop_img_rotated[:, :, 3] / 255.0)
-    #         # mosaic_img =
-    #         sup_izq = (round(p[0][0] * total_large),
-    #                    round((1.0 - p[0][1]) * total_large))
-    #         mosaic_img.paste(p2, sup_izq)
-    #     else:
-    #         ####################################################################
-    #         # Paste tile
-    #         sup_izq = (round(p[0][0] * total_large),
-    #                    round((1.0 - p[0][1]) * total_large))
-    #         mosaic_img.paste(tiles[closest[1]], sup_izq)
 
     mosaic_img.save(
-        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)
+        config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=95, subsampling=0)
 
     # end = time.time()
     # print("TIME: " + str(end-start))
