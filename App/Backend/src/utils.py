@@ -83,7 +83,7 @@ def Mosaic(uvs_info, UUID):
     # start = time.time()
     # Configuracion
     file = open("map_coords_mosaic.txt", "r")
-    tiles_textures = json.loads(file.read())
+    # tiles_textures = json.loads(file.read())
     main_photo = Image.open(getAbsolutePath(
         config["DIRECTORY_FILES_BAKED_TEXTURES"], UUID + ".png"))
     h, w = main_photo.size
@@ -108,15 +108,15 @@ def Mosaic(uvs_info, UUID):
     verts = uvs_info["verts"]
     for v in verts:
         vv = (v[0] + tile_size, v[1] + tile_size)
-        v0 = (v[0] * h, (1.0 - v[1]) * w)
-        v1 = (vv[0] * h, (1.0 - vv[1]) * w)
+        v0 = (v[0] * h, v[1] * w)
+        v1 = (vv[0] * h,  vv[1] * w)
         crop_img = main_photo.crop((v0[0], v0[1], v1[0], v1[1]))
         mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
         closest = tree.query(mean_color)
         p_x = int(v[0] * mosaic_size)
         # if(p_x % 16 != 0):
         #     p_x = p_x - 1
-        v_paste = (p_x, int((1.0 - v[1]) * mosaic_size))
+        v_paste = (p_x, int(v[1] * mosaic_size))
         mosaic_img.paste(tiles[closest[1]], v_paste)
     mosaic_img.save(
         config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=100, subsampling=0)
