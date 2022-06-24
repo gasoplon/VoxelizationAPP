@@ -4,6 +4,7 @@ import numpy as np
 import time
 import math
 import json
+import bmesh
 # ////////////////////////  CTES  /////////////////////////////
 
 DESC_FORMAT = "ERR_CODE: {} - {}."  # Errores
@@ -110,6 +111,33 @@ all_objects = [cage_remeshed_object, remeshed_object]
 
 deselectAllObjects()
 
+############################################################
+
+select_one_object(original_object)
+bpy.ops.object.editmode_toggle()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.tris_convert_to_quads()
+me = original_object.data
+bm = bmesh.from_edit_mesh(me)
+
+# for face in bm.faces:
+#     print(face)
+#     print(face.loops)
+#     for loop in face.loops:
+#         # uv = loop[uv_lay].uv
+#         # print("Loop UV: %f, %f" % uv[:])
+#         vert = loop.vert
+#         print("Loop Vert: (%f,%f,%f)" % vert.co[:])
+# for f in bm.faces:
+#     if f.select:
+#         print(f.index)
+#         print(f)
+#         print(f.verts)
+#         # for v in bm.verts:
+#         #     print(v.co)
+
+############################################################
+
 # Remesh(Voxelization)
 if(APPLY_MODIFIERS["remesh"]):
     if(DEBUG_TIME):
@@ -131,7 +159,6 @@ if(APPLY_MODIFIERS["remesh"]):
     if(DEBUG_TIME):
         end = time.time()
         TIMES_STR += "Remesh Time:\t" + str(end-start) + "\n"
-
 
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):

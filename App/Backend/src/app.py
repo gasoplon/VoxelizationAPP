@@ -144,11 +144,11 @@ def receive_file():
         returned_file_name = UUID + "." + \
             config["RETURNED_ALLOW_FILE_EXTENSION"]
 
-        Mosaic(uvs_info, UUID)
+        # Mosaic(uvs_info, UUID)
 
         # # # TODO: Minecraft Command.......
 
-        applyTexture(returned_file_name, UUID)
+        # applyTexture(returned_file_name, UUID)
 
     # TODO: Send OK, archivo, comando...
     # response = jsonify({'Status': 'Ok'})
