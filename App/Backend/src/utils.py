@@ -65,32 +65,31 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
 
     output = os.popen(formatted_command)
     out_str = output.read()
-    logger.error(out_str)
+    # logger.error(out_str)
     errors = findall("ERR_CODE: \d", out_str)
     logger.error(errors)
-    # uvs_info = eval(search("UV_INFO(.+)UV_INFO", out_str).group(1))
+    uvs_info = eval(search("UV_INFO(.+)UV_INFO", out_str).group(1))
     # logger.info(polygons)
     for e in errors:
         if('1' in e):
             raise InvalidAPIParameterException(
                 ERROR_CODES.NO_SINGLE_ELEMENT_IN_FILE_ERROR_030)
-    # return uvs_info
+    return uvs_info
 
 # GENERACIÓN DE MOISACO
 
 
+def scale(val, src, dst):
+    return ((val - src[0]) / (src[1]-src[0])) * (dst[1]-dst[0]) + dst[0]
+
+
 def Mosaic(uvs_info, UUID):
     # start = time.time()
-    # Configuracion
-    # file = open("map_coords_mosaic.txt", "r")
-    # tiles_textures = json.loads(file.read())
     main_photo = Image.open(getAbsolutePath(
         config["DIRECTORY_FILES_BAKED_TEXTURES"], UUID + ".png"))
     h, w = main_photo.size
     mosaic_size = math.ceil(math.sqrt(uvs_info["n_tiles"])) * 16
     mosaic_img = Image.new('RGB', (mosaic_size, mosaic_size))
-    draw = ImageDraw.Draw(mosaic_img)
-    draw2 = ImageDraw.Draw(main_photo)
     colors = []
     tiles = []
     for tile_path in os.listdir(config['DIRECTORY_MINECRAFT_TEXTURES']):
@@ -104,42 +103,43 @@ def Mosaic(uvs_info, UUID):
             tiles.append(tile)
             colors.append(mean_color)
     tree = spatial.KDTree(colors)
-
     tile_size = uvs_info["wh_size"]
-    verts = uvs_info["verts"]
-    for v in verts:
-        vv = (v[0] + tile_size, v[1] + tile_size)
-        v0 = (v[0] * h, v[1] * w)
-        v1 = (vv[0] * h,  vv[1] * w)
-        draw2.point(v0, fill=0)
-        crop_img = main_photo.crop((v0[0], v0[1], v1[0], v1[1]))
-        mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
-        closest = tree.query(mean_color)
-        p_x = int(v[0] * mosaic_size)
-        p_y = int(v[1] * mosaic_size)
-        if(p_x % 16 != 0):
-            p_x_0 = p_x - 1
-            p_x_1 = p_x + 1
-            if(p_x_0 % 16 == 0):
-                p_x = p_x_0
-            else:
-                p_x = p_x_1
-        if(p_y % 16 != 0):
-            p_y_0 = p_y - 1
-            p_y_1 = p_y + 1
-            if(p_y_0 % 16 == 0):
-                p_y = p_y_0
-            else:
-                p_y = p_y_1
-        v_paste = (p_x, p_y)
-        mosaic_img.paste(tiles[closest[1]], v_paste)
-        draw.point(v_paste, fill=255)
-    # main_photo.save(
-    #     config["DIRECTORY_MOSAICS_GENERATED"] + "/" + "ASD_" + UUID + ".png", quality=95, subsampling=0)
+    for key in uvs_info["blocks"].keys():
+        block = uvs_info["blocks"][key]
+        texture = None
+        for face in block:
+            # UV esquina inferior izq. de la tile
+            v = face["coord"]
+            # esquina superior izq. para hacer el crop
+            v0 = (v[0] * h, (mosaic_size - 16) - (v[1] * w))
+            v1 = (v0[0] + 16,  v0[1] + 16)
+            # print(v, v0, v1)
+            crop_img = main_photo.crop((v0[0], v0[1], v1[0], v1[1]))
+            mean_color = np.array(crop_img).mean(axis=0).mean(axis=0)
+            closest = tree.query(mean_color)
+            # p_x = int(v0[0])
+            # p_y = int(v0[1])
+            # if(p_x % 16 != 0):
+            #     p_x_0 = p_x - 1
+            #     p_x_1 = p_x + 1
+            #     if(p_x_0 % 16 == 0):
+            #         p_x = p_x_0
+            #     else:
+            #         p_x = p_x_1
+            # if(p_y % 16 != 0):
+            #     p_y_0 = p_y - 1
+            #     p_y_1 = p_y + 1
+            #     if(p_y_0 % 16 == 0):
+            #         p_y = p_y_0
+            #     else:
+            #         p_y = p_y_1
+            if(texture is None):
+                texture = tiles[closest[1]]
+            mosaic_img.paste(texture, (int(v0[0]), int(v0[1])))
+            # mosaic_img.paste(tiles[closest[1]], (p_x, p_y))
+    print(json.dumps(uvs_info))
     mosaic_img.save(
         config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=95, subsampling=0)
-    print(verts)
-
     # end = time.time()
     # print("TIME: " + str(end-start))
 

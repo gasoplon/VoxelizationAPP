@@ -19,8 +19,8 @@ ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
     "generateUVs": True,
-    "extrude": False,
-    "bake": False,
+    "extrude": True,
+    "bake": True,
 }
 # EXPORT UVs
 UVS_INFO = ""
@@ -111,33 +111,6 @@ all_objects = [cage_remeshed_object, remeshed_object]
 
 deselectAllObjects()
 
-############################################################
-
-# select_one_object(original_object)
-# bpy.ops.object.editmode_toggle()
-# bpy.ops.object.mode_set(mode='EDIT')
-# bpy.ops.mesh.tris_convert_to_quads()
-# me = original_object.data
-# bm = bmesh.from_edit_mesh(me)
-
-# for face in bm.faces:
-#     print(face)
-#     print(face.loops)
-#     for loop in face.loops:
-#         # uv = loop[uv_lay].uv
-#         # print("Loop UV: %f, %f" % uv[:])
-#         vert = loop.vert
-#         print("Loop Vert: (%f,%f,%f)" % vert.co[:])
-# for f in bm.faces:
-#     if f.select:
-#         print(f.index)
-#         print(f)
-#         print(f.verts)
-#         # for v in bm.verts:
-#         #     print(v.co)
-
-############################################################
-
 # Remesh(Voxelization)
 if(APPLY_MODIFIERS["remesh"]):
     if(DEBUG_TIME):
@@ -192,9 +165,7 @@ if(APPLY_MODIFIERS["generateUVs"]):
             if(loop_index % 4 == 0):
                 if key not in new_dict['blocks']:
                     new_dict['blocks'][key] = []
-                    new_dict['blocks'][key].append(vert)
-                else:
-                    new_dict['blocks'][key].append(vert)
+                new_dict['blocks'][key].append({"coord": vert})
                 new_uv.data[loop_index].uv = vert
             elif loop_index % 4 == 1:
                 new_uv.data[loop_index].uv = (vert[0] + tam, vert[1])
@@ -272,31 +243,11 @@ if(APPLY_MODIFIERS["bake"]):
     texture_image.save_render(
         filepath='.\\' + baked_directory + "\\" + file_name + baked_file_extension)
 
-############################# INFO ############################
-# deselectAllObjects()
-select_one_object(remeshed_object)
-bpy.ops.object.editmode_toggle()
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.tris_convert_to_quads()
-me = remeshed_object.data
-bm = bmesh.from_edit_mesh(me)
-
-# for face in bm.faces:
-#     print(face)
-#     print(face.loops)
-#     for loop in face.loops:
-#         # uv = loop['NewUV'].uv
-#         # print("Loop UV: %f, %f" % uv[:])
-#         vert = loop.vert
-
-#         print("Loop Vert: (%f,%f,%f)" % vert.co[:])
-
-####################################################################################
 
 if(DEBUG_TIME):
     print(TIMES_STR + TIMES_STR_FIN)
 
-# deselectAllObjects()
+deselectAllObjects()
 select_one_object(remeshed_object)
 bpy.ops.export_scene.gltf(
     filepath=obj_out, export_format='GLTF_EMBEDDED', use_selection=True, export_materials='EXPORT', export_apply=True)
