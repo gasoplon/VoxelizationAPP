@@ -19,8 +19,8 @@ ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
     "generateUVs": True,
-    "extrude": True,
-    "bake": True,
+    "extrude": False,
+    "bake": False,
 }
 # EXPORT UVs
 UVS_INFO = ""
@@ -113,12 +113,12 @@ deselectAllObjects()
 
 ############################################################
 
-select_one_object(original_object)
-bpy.ops.object.editmode_toggle()
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.mesh.tris_convert_to_quads()
-me = original_object.data
-bm = bmesh.from_edit_mesh(me)
+# select_one_object(original_object)
+# bpy.ops.object.editmode_toggle()
+# bpy.ops.object.mode_set(mode='EDIT')
+# bpy.ops.mesh.tris_convert_to_quads()
+# me = original_object.data
+# bm = bmesh.from_edit_mesh(me)
 
 # for face in bm.faces:
 #     print(face)
@@ -176,28 +176,38 @@ if(APPLY_MODIFIERS["generateUVs"]):
     max_rows = math.ceil(math.sqrt(n_tiles))
     UV_IMAGE_RESOLUTION = max_rows * 16
     tam = 1.0 / max_rows
-    new_dict = {'n_tiles': n_tiles, 'wh_size': tam}
-    verts = []
+    new_dict = {'n_tiles': n_tiles, 'wh_size': tam, 'blocks': {}}
     col = 0
     row = 0
     vert = (0.0, 0.0)
-    for loop in remeshed_object.data.loops:
-        if(loop.index % 4 == 0):
-            verts.append(vert)
-            new_uv.data[loop.index].uv = vert
-        elif loop.index % 4 == 1:
-            new_uv.data[loop.index].uv = (vert[0] + tam, vert[1])
-        elif loop.index % 4 == 2:
-            new_uv.data[loop.index].uv = (vert[0] + tam, vert[1] + tam)
-        elif loop.index % 4 == 3:
-            row += 1
-            vert = (col * tam, row * tam)
-            new_uv.data[loop.index].uv = vert
-        if(row == max_rows):
-            row = 0
-            col += 1
-            vert = (col * tam, 0)
-    new_dict['verts'] = verts
+    # Recorrer las caras del objeto
+    for f in remeshed_object.data.polygons:
+        # Obtener el bloque al que pertenece la cara
+        v0 = remeshed_object.data.vertices[f.vertices[0]].co
+        v1 = remeshed_object.data.vertices[f.vertices[1]].co
+        D = math.dist(v0, v1) / 2
+        block = f.center - D * f.normal
+        key = str(block[0]) + "," + str(block[1]) + "," + str(block[2])
+        for loop_index in f.loop_indices:
+            if(loop_index % 4 == 0):
+                if key not in new_dict['blocks']:
+                    new_dict['blocks'][key] = []
+                    new_dict['blocks'][key].append(vert)
+                else:
+                    new_dict['blocks'][key].append(vert)
+                new_uv.data[loop_index].uv = vert
+            elif loop_index % 4 == 1:
+                new_uv.data[loop_index].uv = (vert[0] + tam, vert[1])
+            elif loop_index % 4 == 2:
+                new_uv.data[loop_index].uv = (vert[0] + tam, vert[1] + tam)
+            elif loop_index % 4 == 3:
+                row += 1
+                vert = (col * tam, row * tam)
+                new_uv.data[loop_index].uv = vert
+            if(row == max_rows):
+                row = 0
+                col += 1
+                vert = (col * tam, 0)
     print("UV_INFO" + json.dumps(new_dict) + "UV_INFO")
     if(DEBUG_TIME):
         end = time.time()
@@ -262,11 +272,31 @@ if(APPLY_MODIFIERS["bake"]):
     texture_image.save_render(
         filepath='.\\' + baked_directory + "\\" + file_name + baked_file_extension)
 
+############################# INFO ############################
+# deselectAllObjects()
+select_one_object(remeshed_object)
+bpy.ops.object.editmode_toggle()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.tris_convert_to_quads()
+me = remeshed_object.data
+bm = bmesh.from_edit_mesh(me)
+
+# for face in bm.faces:
+#     print(face)
+#     print(face.loops)
+#     for loop in face.loops:
+#         # uv = loop['NewUV'].uv
+#         # print("Loop UV: %f, %f" % uv[:])
+#         vert = loop.vert
+
+#         print("Loop Vert: (%f,%f,%f)" % vert.co[:])
+
+####################################################################################
 
 if(DEBUG_TIME):
     print(TIMES_STR + TIMES_STR_FIN)
 
-deselectAllObjects()
+# deselectAllObjects()
 select_one_object(remeshed_object)
 bpy.ops.export_scene.gltf(
     filepath=obj_out, export_format='GLTF_EMBEDDED', use_selection=True, export_materials='EXPORT', export_apply=True)
