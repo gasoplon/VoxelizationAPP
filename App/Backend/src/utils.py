@@ -11,6 +11,7 @@ from scipy import spatial
 import numpy as np
 import json
 import math
+
 # Constantes
 BLENDER_COMMAND_VOXELIZATION = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
 
@@ -65,7 +66,7 @@ def Voxelization(UUID, file_name, resolution, removeDisconnectedElements):
 
     output = os.popen(formatted_command)
     out_str = output.read()
-    # logger.error(out_str)
+    logger.error(out_str)
     errors = findall("ERR_CODE: \d", out_str)
     logger.error(errors)
     uvs_info = eval(search("UV_INFO(.+)UV_INFO", out_str).group(1))
@@ -135,9 +136,9 @@ def Mosaic(uvs_info, UUID):
             #         p_y = p_y_1
             if(texture is None):
                 texture = tiles[closest[1]]
-            mosaic_img.paste(texture, (int(v0[0]), int(v0[1])))
-            # mosaic_img.paste(tiles[closest[1]], (p_x, p_y))
-    print(json.dumps(uvs_info))
+            # mosaic_img.paste(texture, (int(v0[0]), int(v0[1])))
+            mosaic_img.paste(tiles[closest[1]], (p_x, p_y))
+    # print(json.dumps(uvs_info))
     mosaic_img.save(
         config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=95, subsampling=0)
     # end = time.time()

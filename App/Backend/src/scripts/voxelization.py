@@ -154,6 +154,7 @@ if(APPLY_MODIFIERS["generateUVs"]):
     row = 0
     vert = (0.0, 0.0)
     # Recorrer las caras del objeto
+    print(remeshed_object.data.polygons)
     for f in remeshed_object.data.polygons:
         # Obtener el bloque al que pertenece la cara
         v0 = remeshed_object.data.vertices[f.vertices[0]].co
@@ -179,6 +180,9 @@ if(APPLY_MODIFIERS["generateUVs"]):
                 row = 0
                 col += 1
                 vert = (col * tam, 0)
+    for k in list(new_dict['blocks'].keys()):
+        if(len(new_dict['blocks'][k]) == 1):
+            new_dict['blocks'].pop(k)
     print("UV_INFO" + json.dumps(new_dict) + "UV_INFO")
     if(DEBUG_TIME):
         end = time.time()
