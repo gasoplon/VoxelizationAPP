@@ -143,9 +143,12 @@ def receive_file():
         returned_file_name = UUID + "." + \
             config["RETURNED_ALLOW_FILE_EXTENSION"]
 
-        Mosaic(uvs_info, UUID)
+        textureBlocks = Mosaic(uvs_info, UUID)
 
         applyTexture(returned_file_name, UUID)
+
+        commando = createMinecraftCommand(textureBlocks)
+        print(commando.replace("'", '"'))
 
     # TODO: Send OK, archivo, comando...
     # response = jsonify({'Status': 'Ok'})

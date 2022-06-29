@@ -101,10 +101,11 @@ def Mosaic(uvs_info, UUID):
             tile = tile.convert('RGBA')
         mean_color = np.array(tile).mean(axis=0).mean(axis=0)
         if(mean_color.shape and mean_color.shape[0] == 4):
-            tiles.append(tile)
+            tiles.append([tile, tile_path.split(".")[0]])
             colors.append(mean_color)
     tree = spatial.KDTree(colors)
-    tile_size = uvs_info["wh_size"]
+    textureBlocks = []
+    # tile_size = uvs_info["wh_size"]
     for key in uvs_info["blocks"].keys():
         block = uvs_info["blocks"][key]
         texture = None
@@ -135,14 +136,20 @@ def Mosaic(uvs_info, UUID):
                 else:
                     p_y = p_y_1
             if(texture is None):
-                texture = tiles[closest[1]]
+                texture = tiles[closest[1]][0]
+                block_coords = key.split(",")
+                textureBlocks.append(
+                    [[block_coords[0], block_coords[1], block_coords[2]], tiles[closest[1]][1]])
+                # uvs_info["blocks"][key]["blockName"] = tiles[closest[1]][1]
+                # print(closest[1])
             mosaic_img.paste(texture, (p_x, p_y))
             # mosaic_img.paste(tiles[closest[1]], (p_x, p_y))
-    print(json.dumps(uvs_info))
+    # print(json.dumps(textureBlocks))
     mosaic_img.save(
         config["DIRECTORY_MOSAICS_GENERATED"] + "/" + UUID + ".jpeg", quality=95, subsampling=0)
     # end = time.time()
     # print("TIME: " + str(end-start))
+    return textureBlocks
 
 
 # APLICAICÓN DE TEXTURA GENERADA
@@ -159,3 +166,23 @@ def getAbsolutePath(root, *args):
     for p in args:
         path = os.path.join(path, p)
     return os.path.abspath(os.path.join(root, path))
+
+# CREAR COMANDO DE MINECRAFT
+
+
+def createMinecraftCommand(blocks):
+    command = "/summon falling_block ~ ~1 ~ {}"
+    setblock_command = "/setblock ~{} ~{} ~{} minecraft:{}"
+    FILL_COM = "{{Command:'"'/fill ~ ~-{} ~-1 ~ ~40 ~-1 redstone_block'"'}},Passengers:[{{id:falling_block,Block:redstone_block,Time:1}}]"
+    # first_arg = Command, second_arg = Passengers
+    passenger = "{{id:falling_block,Block:command_block,Time:1,TileEntityData:{{Command:'"'{}'"'}}{}}}"
+    return command.format(recursiveCommandCreation(blocks, 0, len(blocks), passenger, setblock_command, FILL_COM))
+
+
+def recursiveCommandCreation(blocks, indice, max, passenger, setblock_command, fill_com):
+    if(indice == max):
+        return passenger.format('/fill ~ ~-{} ~-1 ~ ~40 ~-1 redstone_block'.format(max), ",Passengers:[{id:falling_block,Block:redstone_block,Time:1}]")
+    current_block = blocks[indice]
+    sb_com = setblock_command.format(
+        current_block[0][0], current_block[0][1], current_block[0][2], current_block[1])
+    return passenger.format(sb_com, ",Passengers:[" + recursiveCommandCreation(blocks, indice+1, max, passenger, setblock_command, fill_com) + "]")
