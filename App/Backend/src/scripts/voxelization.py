@@ -18,6 +18,7 @@ UV_IMAGE_RESOLUTION = None
 ANGLE_LIMIT = 1.15191731  # 66º
 APPLY_MODIFIERS = {
     "remesh": True,
+    "scale": True,
     "generateUVs": True,
     "extrude": True,
     "bake": True,
@@ -133,6 +134,51 @@ if(APPLY_MODIFIERS["remesh"]):
         end = time.time()
         TIMES_STR += "Remesh Time:\t" + str(end-start) + "\n"
 
+# Remesh(Voxelization)
+
+
+def translate(value, leftMin, leftMax, rightMin, rightMax):
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+    valueScaled = float(value - leftMin) / float(leftSpan)
+    return rightMin + (valueScaled * rightSpan)
+
+
+voxels_by_axe = {"X": 0, "Y": 0, "Z": 0}
+mins_by_axe = {"X": 0, "Y": 0, "Z": 0}
+maxs_by_axe = {"X": 0, "Y": 0, "Z": 0}
+if(APPLY_MODIFIERS["scale"]):
+    select_one_object(remeshed_object)
+    # get first edge of the object remeshed_object
+    edge = remeshed_object.data.edges[0]
+    # los dos puntos del edge
+    v0 = edge.vertices[0]
+    v1 = edge.vertices[1]
+    # dist. de una arista
+    tam_edge = 0.0
+    cont = 0
+    while(tam_edge == 0.0):
+        tam_edge = bpy.data.objects[0].data.vertices[v0].co[cont] - \
+            bpy.data.objects[0].data.vertices[v1].co[cont]
+        cont += 1
+
+    voxels_by_axe["X"] = abs(round(remeshed_object.dimensions.x / tam_edge))
+    voxels_by_axe["Y"] = abs(round(remeshed_object.dimensions.y / tam_edge))
+    voxels_by_axe["Z"] = abs(round(remeshed_object.dimensions.z / tam_edge))
+    verts = []
+    for v in remeshed_object.data.vertices:
+        verts.append([v.co[0], v.co[1], v.co[2]])
+    mins = np.min(verts, axis=0)
+    mins_by_axe["X"] = mins[0]
+    mins_by_axe["Y"] = mins[1]
+    mins_by_axe["Z"] = mins[2]
+    maxs = np.max(verts, axis=0)
+    maxs_by_axe["X"] = maxs[0]
+    maxs_by_axe["Y"] = maxs[1]
+    maxs_by_axe["Z"] = maxs[2]
+    deselectAllObjects()
+
+
 # Generate UV (Smart UV Project) from meshed object
 if(APPLY_MODIFIERS["generateUVs"]):
     if(DEBUG_TIME):
@@ -154,14 +200,19 @@ if(APPLY_MODIFIERS["generateUVs"]):
     row = 0
     vert = (0.0, 0.0)
     # Recorrer las caras del objeto
-    print(remeshed_object.data.polygons)
     for f in remeshed_object.data.polygons:
         # Obtener el bloque al que pertenece la cara
         v0 = remeshed_object.data.vertices[f.vertices[0]].co
         v1 = remeshed_object.data.vertices[f.vertices[1]].co
         D = math.dist(v0, v1) / 2
         block = f.center - D * f.normal
-        key = str(block[0]) + "," + str(block[1]) + "," + str(block[2])
+        x_map = translate(block[0], mins_by_axe["X"],
+                          maxs_by_axe["X"], 0.0, float(voxels_by_axe["X"]))
+        y_map = translate(block[1], mins_by_axe["Y"],
+                          maxs_by_axe["Y"], 0, voxels_by_axe["Y"])
+        z_map = translate(block[2], mins_by_axe["Z"],
+                          maxs_by_axe["Z"], 0, voxels_by_axe["Z"])
+        key = str(int(x_map)) + "," + str(int(y_map)) + "," + str(int(z_map))
         for loop_index in f.loop_indices:
             if(loop_index % 4 == 0):
                 if key not in new_dict['blocks']:
@@ -180,9 +231,6 @@ if(APPLY_MODIFIERS["generateUVs"]):
                 row = 0
                 col += 1
                 vert = (col * tam, 0)
-    for k in list(new_dict['blocks'].keys()):
-        if(len(new_dict['blocks'][k]) == 1):
-            new_dict['blocks'].pop(k)
     print("UV_INFO" + json.dumps(new_dict) + "UV_INFO")
     if(DEBUG_TIME):
         end = time.time()
