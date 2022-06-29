@@ -149,7 +149,7 @@ export function RenderPanel() {
                   onChange={handleResolutionChange}
                   marks
                   min={1}
-                  max={8}
+                  max={7}
                 />
               </div>
             </div>

@@ -4,7 +4,6 @@ from utils import *
 from Exceptions import *
 from flask_wtf.csrf import CSRFProtect
 from flask_cors import CORS, cross_origin
-
 import uuid
 import coloredlogs
 import logging
@@ -145,8 +144,6 @@ def receive_file():
             config["RETURNED_ALLOW_FILE_EXTENSION"]
 
         Mosaic(uvs_info, UUID)
-
-        # # # TODO: Minecraft Command.......
 
         applyTexture(returned_file_name, UUID)
 
