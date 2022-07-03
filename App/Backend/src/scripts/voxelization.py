@@ -207,7 +207,7 @@ if(APPLY_MODIFIERS["generateUVs"]):
         D = math.dist(v0, v1) / 2
         block = f.center - D * f.normal
         x_map = translate(block[0], mins_by_axe["X"],
-                          maxs_by_axe["X"], 0.0, float(voxels_by_axe["X"]))
+                          maxs_by_axe["X"], 0, voxels_by_axe["X"])
         y_map = translate(block[1], mins_by_axe["Y"],
                           maxs_by_axe["Y"], 0, voxels_by_axe["Y"])
         z_map = translate(block[2], mins_by_axe["Z"],

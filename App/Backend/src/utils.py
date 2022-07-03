@@ -11,7 +11,7 @@ from scipy import spatial
 import numpy as np
 import json
 import math
-
+from scipy.spatial.transform import Rotation as R
 # Constantes
 BLENDER_COMMAND_VOXELIZATION = 'blender --background --factory-startup --python ./scripts/voxelization.py -- {} {} {} {} {} {} {}'
 
@@ -216,6 +216,10 @@ def getAbsolutePath(root, *args):
 
 
 def createMinecraftCommand(blocks):
+    rotation_radians = np.radians(-90)
+    rotation_axis = np.array([1, 0, 0])
+    rotation_vector = rotation_radians * rotation_axis
+    rotation = R.from_rotvec(rotation_vector)
     command = "/summon falling_block ~1 ~ ~1 {{Time:1,BlockState:{{Name:activator_rail}},Passengers:[{}]}}"
     set_block_command = "id:command_block_minecart,Command:'setblock ~{} ~{} ~{} minecraft:{} replace'"
     setblocks = ""
@@ -224,7 +228,10 @@ def createMinecraftCommand(blocks):
         for t in BLOCKS:
             if(t in b[1]):
                 b[1] = t
-        sb = set_block_command.format(b[0][0], b[0][1], b[0][2], b[1])
+        rotated_vec = rotation.apply(
+            [int(b[0][0]) + 10, int(b[0][1]) + 10, int(b[0][2]) + 10])
+        sb = set_block_command.format(
+            rotated_vec[0], rotated_vec[1], rotated_vec[2], b[1])
         setblocks += "{" + sb + "},"
         if(len(setblocks) > 29000):
             commands.append(command.format(setblocks))
