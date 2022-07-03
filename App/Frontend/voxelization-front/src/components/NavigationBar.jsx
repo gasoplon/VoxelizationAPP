@@ -19,9 +19,9 @@ export function NavigationBar() {
               <Nav.Link as={Link} to="/herramienta">
                 Herramienta
               </Nav.Link>
-              <Nav.Link as={Link} to="/about">
+              {/* <Nav.Link as={Link} to="/about">
                 About
-              </Nav.Link>
+              </Nav.Link> */}
             </Nav>
           </Navbar.Collapse>
         </Container>

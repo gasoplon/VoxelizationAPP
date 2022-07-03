@@ -157,13 +157,6 @@ def receive_file():
     f = open(filePath, "r")
     s_f = f.read()
     f.close()
-    # response = jsonify({'command': comando})
-    # response["file"] = f.read()
-    # TODO: CODIGOS DE ERROR
-    # return send_from_directory(
-    #     config["DIRECTORY_FILES_PROCESSED"], path=returned_file_name, as_attachment=True)
-    # print(file.get_data())
-    # r = {"command": comando, "file": file}
     return {"command": comando, "file": s_f}
 
 

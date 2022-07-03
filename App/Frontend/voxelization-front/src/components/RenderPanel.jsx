@@ -25,7 +25,7 @@ export function RenderPanel() {
   const [selectedURLFile, setSelectedURLFile] = React.useState();
 
   // Comando a renderizar
-  const [selectedCommand, setSelectedCommand] = React.useState("");
+  const [selectedCommand, setSelectedCommand] = React.useState([]);
 
   useEffect(() => {
     setSelectedURLFile(filesDataStructure.demos[selectedIDFile].pathFile);
@@ -119,17 +119,32 @@ export function RenderPanel() {
     setUseRemoveDisconnected(true);
   };
 
+  const handleCopyToClipboard = (event) => {
+    // var button = document.getElementById(event.target.id);
+    navigator.clipboard.writeText(selectedCommand[event.target.id]);
+  };
+
   const CommandRender = () => {
-    if (selectedCommand)
+    var buttons = [];
+    var cont = 0;
+    if (selectedCommand.length > 0) {
+      selectedCommand.forEach(() => {
+        buttons.push(
+          <button id={cont} onClick={(event) => handleCopyToClipboard(event)}>
+            Comando {cont}
+          </button>
+        );
+        cont++;
+      });
       return (
         <div class="col pt-4 pb-2" id="comando">
           <Typography sx={{ mt: 1, mb: 1 }} class="list_title" component="div">
             COMANDO
           </Typography>
-          <div class="pt-2 pb-2">{selectedCommand}</div>
+          <div class="col">{buttons}</div>
         </div>
       );
-    return <div></div>;
+    } else return <div></div>;
   };
   // ------------------- RETURN ---------------------------------------
   return (

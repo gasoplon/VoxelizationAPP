@@ -17,6 +17,51 @@ BLENDER_COMMAND_VOXELIZATION = 'blender --background --factory-startup --python 
 
 BLENDER_COMMAND_APPLY_TEXTURE = 'blender --background --factory-startup --python ./scripts/texture_aplying.py -- {} {}'
 
+BLOCKS = [
+    "red_sandstone"
+    "acacia_log",
+    "acacia_planks",
+    "ancient_debris",
+    "andesite",
+    "barrel",
+    "basalt",
+    "beacon",
+    "bee_nest",
+    "beehive",
+    "birch_log",
+    "birch_planks",
+    "blast_furnace",
+    "bone_block",
+    "crafting_table",
+    "crimson_nylium",
+    "crimson_log",
+    "crimson_planks",
+    "warped_nylium",
+    "tnt",
+    "target",
+    "smoker",
+    "smithing_table",
+    "quartz_block",
+    "pumpkin",
+    "polished_basalt",
+    "podzol",
+    "observer",
+    "mycelium",
+    "melon",
+    "loom",
+    "lodestone",
+    "lectern",
+    "jigsaw",
+    "jukebox",
+    "honey_block",
+    "hay_block",
+    "grass_block",
+    "furnace",
+    "fletching_table",
+    "dried_kelp",
+    "cartography_table"
+]
+
 # TimeStamp
 DEBUG_TIME = False
 start = None
@@ -171,18 +216,18 @@ def getAbsolutePath(root, *args):
 
 
 def createMinecraftCommand(blocks):
-    command = "/summon falling_block ~ ~1 ~ {}"
-    setblock_command = "/setblock ~{} ~{} ~{} minecraft:{}"
-    FILL_COM = "{{Command:'"'/fill ~ ~-{} ~-1 ~ ~40 ~-1 redstone_block'"'}},Passengers:[{{id:falling_block,Block:redstone_block,Time:1}}]"
-    # first_arg = Command, second_arg = Passengers
-    passenger = "{{id:falling_block,Block:command_block,Time:1,TileEntityData:{{Command:'"'{}'"'}}{}}}"
-    return command.format(recursiveCommandCreation(blocks, 0, len(blocks), passenger, setblock_command, FILL_COM))
-
-
-def recursiveCommandCreation(blocks, indice, max, passenger, setblock_command, fill_com):
-    if(indice == max):
-        return passenger.format('/fill ~ ~-{} ~-1 ~ ~40 ~-1 redstone_block'.format(max), ",Passengers:[{id:falling_block,Block:redstone_block,Time:1}]")
-    current_block = blocks[indice]
-    sb_com = setblock_command.format(
-        current_block[0][0], current_block[0][1], current_block[0][2], current_block[1])
-    return passenger.format(sb_com, ",Passengers:[" + recursiveCommandCreation(blocks, indice+1, max, passenger, setblock_command, fill_com) + "]")
+    command = "/summon falling_block ~1 ~ ~1 {{Time:1,BlockState:{{Name:activator_rail}},Passengers:[{}]}}"
+    set_block_command = "id:command_block_minecart,Command:'setblock ~{} ~{} ~{} minecraft:{} replace'"
+    setblocks = ""
+    commands = []
+    for b in blocks:
+        for t in BLOCKS:
+            if(t in b[1]):
+                b[1] = t
+        sb = set_block_command.format(b[0][0], b[0][1], b[0][2], b[1])
+        setblocks += "{" + sb + "},"
+        if(len(setblocks) > 29000):
+            commands.append(command.format(setblocks))
+            setblocks = ""
+    commands.append(command.format(setblocks))
+    return commands
