@@ -1,3 +1,4 @@
+from click import command
 from flask import Flask, request, jsonify, send_from_directory, Response, send_file
 from config import config
 from utils import *
@@ -7,7 +8,7 @@ from flask_cors import CORS, cross_origin
 import uuid
 import coloredlogs
 import logging
-
+import json
 import ERROR_CODES
 
 # TODO: Implementar API KEY https://geekflare.com/es/securing-flask-api-with-jwt/
@@ -147,13 +148,23 @@ def receive_file():
 
         applyTexture(returned_file_name, UUID)
 
-        commando = createMinecraftCommand(textureBlocks)
-        print(commando.replace("'", '"'))
+        comando = createMinecraftCommand(textureBlocks)
+        # print(commando.replace("'", '"'))
 
     # TODO: Send OK, archivo, comando...
-    # response = jsonify({'Status': 'Ok'})
+    filePath = getAbsolutePath(
+        config['DIRECTORY_FILES_PROCESSED'], returned_file_name)
+    f = open(filePath, "r")
+    s_f = f.read()
+    f.close()
+    # response = jsonify({'command': comando})
+    # response["file"] = f.read()
     # TODO: CODIGOS DE ERROR
-    return send_from_directory(config["DIRECTORY_FILES_PROCESSED"], path=returned_file_name, as_attachment=True)
+    # return send_from_directory(
+    #     config["DIRECTORY_FILES_PROCESSED"], path=returned_file_name, as_attachment=True)
+    # print(file.get_data())
+    # r = {"command": comando, "file": file}
+    return {"command": comando, "file": s_f}
 
 
 if __name__ == '__main__':

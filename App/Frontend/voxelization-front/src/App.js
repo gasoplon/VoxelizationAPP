@@ -13,6 +13,7 @@ function App() {
       <NavigationBar />
       <Routes>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/herramienta" element={<RenderPanel />} />
       </Routes>
       {/* <Footer /> */}

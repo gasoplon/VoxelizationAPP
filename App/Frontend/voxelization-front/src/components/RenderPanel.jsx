@@ -10,7 +10,7 @@ import { FiTool } from "react-icons/fi";
 import { FaInfoCircle } from "react-icons/fa";
 import { FilesStructure } from "../FileDataStructure.js";
 import { motion } from "framer-motion/dist/framer-motion";
-
+import Typography from "@mui/material/Typography";
 export function RenderPanel() {
   // ------------------- ESTADOS -----------------------------------------
   // Estado con la estructura de datos para los archivos
@@ -23,6 +23,9 @@ export function RenderPanel() {
   );
   // Información del objeto seleccionado
   const [selectedURLFile, setSelectedURLFile] = React.useState();
+
+  // Comando a renderizar
+  const [selectedCommand, setSelectedCommand] = React.useState("");
 
   useEffect(() => {
     setSelectedURLFile(filesDataStructure.demos[selectedIDFile].pathFile);
@@ -72,9 +75,10 @@ export function RenderPanel() {
       axios
         .post(Constants.API_UPLOAD_FILE_URL, formData)
         .then((resp) => {
-          var myblob = new Blob([JSON.stringify(resp.data)], {
+          var myblob = new Blob([resp.data["file"]], {
             type: "text/plain",
           });
+          setSelectedCommand(resp.data["command"]);
           let copyDataStrcuture = filesDataStructure.clone();
           copyDataStrcuture.addModifiedFile(selectedIDFile, myblob);
           setFilesDataStructure(copyDataStrcuture);
@@ -115,6 +119,18 @@ export function RenderPanel() {
     setUseRemoveDisconnected(true);
   };
 
+  const CommandRender = () => {
+    if (selectedCommand)
+      return (
+        <div class="col pt-4 pb-2" id="comando">
+          <Typography sx={{ mt: 1, mb: 1 }} class="list_title" component="div">
+            COMANDO
+          </Typography>
+          <div class="pt-2 pb-2">{selectedCommand}</div>
+        </div>
+      );
+    return <div></div>;
+  };
   // ------------------- RETURN ---------------------------------------
   return (
     <div class="container text-white">
@@ -126,8 +142,8 @@ export function RenderPanel() {
       >
         <RenderBox selectedURLFile={selectedURLFile}></RenderBox>
       </motion.div>
-      <div class="row justify-content-center text-center">
-        <div class="row justify-content-center text-center">
+      <div class="row justify-content-center text-center ">
+        <div class="row justify-content-center text-center pb-5">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -186,6 +202,11 @@ export function RenderPanel() {
             />
           </motion.div>
         </div>
+        <div class="row justify-content-center text-center">
+          <div class="col-md-2"></div>
+          {CommandRender()}
+          <div class="col-md-2"></div>
+        </div>
         <div class="row justify-content-center text-center pt-5 pb-2">
           <Button
             onClick={onFileUpload}
@@ -196,14 +217,6 @@ export function RenderPanel() {
           </Button>
         </div>
       </div>
-      {/* 
-      <br />
-      
-      <Box>
-
-
-
-      </Box> */}
     </div>
   );
 }

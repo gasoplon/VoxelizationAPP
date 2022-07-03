@@ -10,11 +10,28 @@
 }
 
 .titulo_app {
-    font-family: 'Minecraft', sans-serif;
+    font-family: 'Minecraft', sans-serif !important;
 }
 
 .img-tutorial-1 {
     content:url(./imgs/3D_2_VOXEL.jpg);
+    border-style: solid;
+    box-shadow: 0 .5rem 1rem rgba(0,0,.15,.15)!important;
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+    font-weight: 500;
+}
+
+.img-title {
+    content:url(./imgs/VOXELIZA-ME.png);
+}
+.img-tut-1 {
+    content:url(./imgs/tut_1.png);
+    border-style: solid;
+    box-shadow: 0 .5rem 1rem rgba(0,0,.15,.15)!important;
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+    /* width: 100%; */
 }
 
 canvas {
@@ -27,6 +44,18 @@ canvas {
     height: 100%;
 }
 
+#comando{
+    border-radius: 10px;
+    border-style: solid;
+    box-shadow: 0 .5rem 1rem rgba(0,0,.15,.15)!important;
+    color: var(--border-color-button);
+    border-radius: 0.5em;
+    width: 100%;
+    height: 100%;
+    font-weight: 700;
+    background-color: #ffeca9;
+}
+
 body {
     background-color: #ffffff;
     /* height: 1700px; */
@@ -35,6 +64,13 @@ body {
 .texto_normal {
     color:#005555;
     font-weight: 500;
+    font-size: 1em;
+}
+
+.texto_titulo {
+    color:#005555;
+    font-weight: 500;
+    font-size: 30px;
 }
 
 .custom_button {
