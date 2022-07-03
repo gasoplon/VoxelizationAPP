@@ -157,6 +157,7 @@ export function RenderPanel() {
         class="row m-5"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, times: [1, 1.2, 2] }}
       >
         <RenderBox selectedURLFile={selectedURLFile}></RenderBox>
       </motion.div>
@@ -165,6 +166,7 @@ export function RenderPanel() {
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, times: [1, 1.2, 2] }}
             class="col-md-4 panel p-3"
           >
             <h1 class="row pb-3">
@@ -208,6 +210,7 @@ export function RenderPanel() {
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, times: [1, 1.2, 2] }}
             class="col-md-4 panel p-3"
           >
             <SelectListObject
@@ -225,7 +228,12 @@ export function RenderPanel() {
           {CommandRender()}
           <div class="col-md-2"></div>
         </div>
-        <div class="row justify-content-center text-center pt-5 pb-2">
+        <motion.div
+          class="row justify-content-center text-center pt-5 pb-2"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, times: [1, 1.2, 2] }}
+        >
           <Button
             onClick={onFileUpload}
             class="custom_button col-5 pt-2 pb-2 p-1 mb-5 "
@@ -233,7 +241,7 @@ export function RenderPanel() {
           >
             ¡Voxelizar!
           </Button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

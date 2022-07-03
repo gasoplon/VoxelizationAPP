@@ -1,7 +1,7 @@
 export const API_UPLOAD_FILE_URL = "http://localhost:5000/api/uploadFile";
 export const DEMOS_MODELS = [
   // "Chair.glb",
-  "House.glb",
+  // "House.glb",
   "OldCar.glb",
   "Truck.glb",
 ];
