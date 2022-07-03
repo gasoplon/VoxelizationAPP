@@ -101,3 +101,11 @@ body {
     font-weight: 900;
     text-transform: uppercase;
 }
+
+.command_button {
+    border-radius: 5px;
+}
+
+.command_button::hover {
+    background-color: #ffd43b;
+}

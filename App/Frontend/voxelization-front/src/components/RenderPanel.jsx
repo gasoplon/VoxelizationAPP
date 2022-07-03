@@ -121,6 +121,7 @@ export function RenderPanel() {
 
   const handleCopyToClipboard = (event) => {
     // var button = document.getElementById(event.target.id);
+    event.target.style.backgroundColor = "salmon";
     navigator.clipboard.writeText(selectedCommand[event.target.id]);
   };
 
@@ -130,18 +131,20 @@ export function RenderPanel() {
     if (selectedCommand.length > 0) {
       selectedCommand.forEach(() => {
         buttons.push(
-          <button id={cont} onClick={(event) => handleCopyToClipboard(event)}>
-            Comando {cont}
-          </button>
+          <div class="col p-2">
+            <button id={cont} onClick={(event) => handleCopyToClipboard(event)}>
+              Comando {cont}
+            </button>
+          </div>
         );
         cont++;
       });
       return (
         <div class="col pt-4 pb-2" id="comando">
-          <Typography sx={{ mt: 1, mb: 1 }} class="list_title" component="div">
-            COMANDO
+          <Typography class="list_title pt-1 pb-2" component="div">
+            COMANDOS
           </Typography>
-          <div class="col">{buttons}</div>
+          <div class="row p-1 command_button">{buttons}</div>
         </div>
       );
     } else return <div></div>;
